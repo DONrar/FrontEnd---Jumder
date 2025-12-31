@@ -1,0 +1,7 @@
+{
+  "name": "jumder-ulloa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
