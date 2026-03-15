@@ -1,0 +1,1266 @@
+/* src/app/pages/partido-detail/partido-detail.page.scss */
+// ============================================================================
+// VARIABLES GLOBALES Y MIXINS
+// ============================================================================
+
+// Colores principales (misma paleta)
+$color-primary-dark: #132440;
+$color-primary: #16476A;
+$color-accent: #3B9797;
+$color-warning: #BF092F;
+$color-success: #11998e;
+$color-background: #f8f9fa;
+$color-white: #ffffff;
+$color-gray-light: #f0f0f0;
+$color-gray-medium: #666666;
+$color-gray-dark: #333333;
+
+// Colores de estados
+$color-programado: #FF9800;
+$color-en-curso: #4CAF50;
+$color-finalizado: #9E9E9E;
+$color-cancelado: #F44336;
+$color-suspendido: #FF5722;
+
+// Sombras
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+$shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
+$shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.15);
+$shadow-glow: 0 0 20px rgba($color-accent, 0.3);
+
+// Bordes redondeados
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+$border-radius-circle: 50%;
+
+// Transiciones
+$transition-fast: 0.2s ease;
+$transition-medium: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Mixins reutilizables
+@mixin card-elevated {
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-light;
+  background: $color-white;
+  transition: transform $transition-medium, box-shadow $transition-medium;
+  overflow: hidden;
+  border: 1px solid rgba($color-primary-dark, 0.08);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-heavy;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// Gradientes
+@mixin gradient-primary {
+  background: linear-gradient(135deg, $color-primary-dark 0%, $color-primary 100%);
+}
+
+@mixin gradient-accent {
+  background: linear-gradient(135deg, $color-primary 0%, $color-accent 100%);
+}
+
+@mixin gradient-success {
+  background: linear-gradient(135deg, $color-success 0%, #38ef7d 100%);
+}
+
+@mixin gradient-warning {
+  background: linear-gradient(135deg, $color-warning 0%, #f85032 100%);
+}
+
+@mixin gradient-programado {
+  background: linear-gradient(135deg, $color-programado 0%, #FFB74D 100%);
+}
+
+@mixin gradient-en-curso {
+  background: linear-gradient(135deg, $color-en-curso 0%, #81C784 100%);
+}
+
+@mixin gradient-finalizado {
+  background: linear-gradient(135deg, $color-finalizado 0%, #E0E0E0 100%);
+}
+
+// ============================================================================
+// ESTILOS PRINCIPALES
+// ============================================================================
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-content {
+  --background: #{$color-background};
+}
+
+// Header personalizado
+ion-toolbar {
+  --background: #{$color-primary-dark};
+  --color: #{$color-white};
+  --border-color: transparent;
+}
+
+// Container principal
+.partido-container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn $transition-slow;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+}
+
+// ============================================================================
+// CARD DE MARCADOR PRINCIPAL
+// ============================================================================
+
+.marcador-card {
+  @include card-elevated;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: visible !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    @include gradient-accent;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+  }
+
+  ion-card-content {
+    padding: 24px !important;
+  }
+}
+
+// Información superior del partido
+.partido-info-top {
+  @include flex-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  ion-chip {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba($color-white, 0.2);
+
+    &.chip-programado {
+      @include gradient-programado;
+      color: $color-white;
+      box-shadow: 0 4px 12px rgba($color-programado, 0.3);
+    }
+
+    &.chip-en-curso {
+      @include gradient-en-curso;
+      color: $color-white;
+      box-shadow: 0 4px 12px rgba($color-en-curso, 0.3);
+      animation: pulseLive 2s infinite;
+    }
+
+    &.chip-finalizado {
+      @include gradient-finalizado;
+      color: $color-gray-dark;
+      box-shadow: 0 4px 12px rgba($color-finalizado, 0.3);
+    }
+
+    &.chip-cancelado,
+    &.chip-suspendido {
+      @include gradient-warning;
+      color: $color-white;
+      box-shadow: 0 4px 12px rgba($color-warning, 0.3);
+    }
+
+    ion-icon {
+      font-size: 14px;
+      margin-right: 8px;
+    }
+  }
+}
+
+// Meta información (fecha y cancha)
+.partido-meta {
+  @include flex-center;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+
+  span {
+    @include flex-center;
+    gap: 8px;
+    color: $color-gray-medium;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: rgba($color-primary-dark, 0.03);
+    border-radius: $border-radius-md;
+    border: 1px solid rgba($color-primary-dark, 0.08);
+    transition: all $transition-fast;
+
+    &:hover {
+      background: rgba($color-accent, 0.05);
+      border-color: rgba($color-accent, 0.2);
+      transform: translateY(-2px);
+    }
+
+    ion-icon {
+      color: $color-accent;
+      font-size: 16px;
+    }
+  }
+}
+
+// Marcador principal
+.marcador-principal {
+  @include flex-between;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 32px;
+  }
+}
+
+// Estilos de equipo
+.equipo {
+  @include flex-center;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+
+  &.local .equipo-logo {
+    @include gradient-primary;
+    border: 3px solid rgba($color-primary, 0.3);
+  }
+
+  &.visitante .equipo-logo {
+    @include gradient-accent;
+    border: 3px solid rgba($color-accent, 0.3);
+  }
+
+  .equipo-logo {
+    @include flex-center;
+    width: 120px;
+    height: 120px;
+    border-radius: $border-radius-circle;
+    margin-bottom: 16px;
+    box-shadow: $shadow-medium;
+    position: relative;
+    overflow: hidden;
+    transition: all $transition-medium;
+
+    &:hover {
+      transform: scale(1.05) rotate(5deg);
+      box-shadow: $shadow-heavy;
+    }
+
+    img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    ion-icon {
+      font-size: 48px;
+      color: $color-white;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+  }
+
+  .equipo-nombre {
+    font-size: 20px;
+    font-weight: 700;
+    color: $color-primary-dark;
+    text-align: center;
+    @include text-ellipsis(2);
+    line-height: 1.3;
+    padding: 0 12px;
+
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
+  }
+}
+
+// Contenedor de goles
+.goles-container {
+  @include flex-center;
+  flex-direction: column;
+  min-width: 200px;
+
+  .goles {
+    @include flex-center;
+    gap: 24px;
+    margin-bottom: 16px;
+
+    .gol-numero {
+      font-size: 72px;
+      font-weight: 900;
+      color: $color-primary-dark;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      line-height: 1;
+      min-width: 80px;
+      text-align: center;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: $color-accent;
+        border-radius: 2px;
+      }
+    }
+
+    .gol-separador {
+      font-size: 48px;
+      color: $color-gray-medium;
+      font-weight: 300;
+    }
+  }
+
+  .estado-texto {
+    ion-badge {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, $color-en-curso 0%, darken($color-en-curso, 10%) 100%);
+      color: $color-white;
+      box-shadow: 0 4px 12px rgba($color-en-curso, 0.4);
+      animation: pulseLive 2s infinite;
+    }
+  }
+}
+
+// Información del ganador
+.ganador-info {
+  @include flex-center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba($color-success, 0.1) 0%, rgba($color-accent, 0.1) 100%);
+  border-radius: $border-radius-md;
+  border: 2px solid rgba($color-success, 0.2);
+  margin-top: 20px;
+
+  &.empate {
+    background: linear-gradient(135deg, rgba($color-programado, 0.1) 0%, rgba(#FF9800, 0.1) 100%);
+    border-color: rgba(#FF9800, 0.2);
+  }
+
+  ion-icon {
+    font-size: 24px;
+    color: $color-success;
+
+    &.empate {
+      color: #FF9800;
+    }
+  }
+
+  span {
+    font-size: 16px;
+    color: $color-primary-dark;
+    font-weight: 600;
+
+    strong {
+      color: $color-success;
+    }
+  }
+}
+
+// ============================================================================
+// ACCIONES DEL PARTIDO
+// ============================================================================
+
+.acciones-partido {
+  margin-top: 32px;
+
+  ion-button {
+    --border-radius: #{$border-radius-md};
+    font-weight: 600;
+    height: 56px;
+    font-size: 16px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all $transition-medium;
+
+    &:hover {
+      --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    &.iniciar-partido {
+      @include gradient-success;
+      --color: #{$color-white};
+    }
+
+    &.gol-button {
+      @include gradient-accent;
+      --color: #{$color-white};
+    }
+
+    &.tarjeta-button {
+      @include gradient-warning;
+      --color: #{$color-white};
+    }
+  }
+
+  .botones-en-curso {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+}
+
+// ============================================================================
+// TABS DE INFORMACIÓN
+// ============================================================================
+
+ion-segment {
+  margin-bottom: 24px;
+  background: $color-white;
+  border-radius: $border-radius-md;
+  padding: 4px;
+  box-shadow: $shadow-light;
+  border: 1px solid rgba($color-primary-dark, 0.08);
+
+  ion-segment-button {
+    --color: #{$color-gray-medium};
+    --color-checked: #{$color-primary-dark};
+    --background-checked: rgba($color-accent, 0.1);
+    --indicator-color: transparent;
+    --border-radius: #{$border-radius-sm};
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+    min-height: 40px;
+
+    &::part(native) {
+      border-radius: $border-radius-sm;
+    }
+
+    &.segment-button-checked {
+      background: rgba($color-accent, 0.1);
+      border: 2px solid rgba($color-accent, 0.3);
+      box-shadow: 0 2px 8px rgba($color-accent, 0.1);
+    }
+
+    ion-label {
+      margin: 0;
+      font-weight: 700;
+    }
+  }
+}
+
+.tab-content {
+  animation: slideUp $transition-medium;
+}
+
+// ============================================================================
+// ALINEACIONES
+// ============================================================================
+
+ion-card {
+  @include card-elevated;
+  height: 100%;
+
+  ion-card-header {
+    padding: 20px 20px 12px;
+    border-bottom: 1px solid rgba($color-primary-dark, 0.08);
+
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: $color-primary-dark;
+      @include flex-center;
+      gap: 8px;
+
+      &::before {
+        content: '';
+        width: 8px;
+        height: 24px;
+        border-radius: 4px;
+      }
+
+      &.local-color::before {
+        @include gradient-primary;
+      }
+
+      &.visitante-color::before {
+        @include gradient-accent;
+      }
+    }
+  }
+}
+
+// Lista de jugadores
+ion-list {
+  padding: 0;
+  background: transparent;
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 0;
+    --background: transparent;
+    --background-hover: rgba($color-accent, 0.05);
+    --border-color: rgba($color-primary-dark, 0.08);
+    margin-bottom: 8px;
+    border-radius: $border-radius-sm;
+    transition: all $transition-fast;
+
+    &:hover {
+      transform: translateX(4px);
+      box-shadow: $shadow-light;
+    }
+
+    &.verificado {
+      --background: rgba($color-success, 0.05);
+      border-left: 4px solid $color-success;
+    }
+
+    &.no-verificado {
+      --background: rgba($color-warning, 0.05);
+      border-left: 4px solid $color-warning;
+    }
+
+    ion-label {
+      h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: $color-primary-dark;
+        margin-bottom: 4px;
+        @include flex-center;
+        gap: 8px;
+
+        .numero-camiseta {
+          background: linear-gradient(135deg, $color-primary-dark 0%, $color-primary 100%);
+          color: $color-white;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+      }
+
+      p {
+        font-size: 12px;
+        color: $color-gray-medium;
+        font-weight: 500;
+      }
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      min-height: 32px;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// EVENTOS (TIMELINE)
+// ============================================================================
+
+.timeline {
+  padding: 20px 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: linear-gradient(to bottom, rgba($color-accent, 0.3), transparent);
+    border-radius: 1px;
+
+    @media (max-width: 768px) {
+      left: 30px;
+    }
+  }
+}
+
+.evento-item {
+  @include flex-between;
+  margin-bottom: 24px;
+  position: relative;
+  animation: slideIn $transition-medium;
+  animation-fill-mode: both;
+
+  &:nth-child(odd) {
+    animation-delay: 0.1s;
+  }
+
+  &:nth-child(even) {
+    animation-delay: 0.2s;
+  }
+
+  &.local {
+    flex-direction: row;
+
+    .evento-info {
+      text-align: right;
+      margin-right: 60px;
+      margin-left: 0;
+
+      @media (max-width: 768px) {
+        margin-right: 50px;
+        margin-left: 60px;
+        text-align: left;
+      }
+    }
+
+    &::before {
+      right: -1px;
+      left: auto;
+      background: $color-primary;
+    }
+  }
+
+  &.visitante {
+    flex-direction: row-reverse;
+
+    .evento-info {
+      text-align: left;
+      margin-left: 60px;
+      margin-right: 0;
+
+      @media (max-width: 768px) {
+        margin-left: 50px;
+        margin-right: 60px;
+        text-align: left;
+      }
+    }
+
+    &::before {
+      left: -1px;
+      right: auto;
+      background: $color-accent;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: $border-radius-circle;
+    border: 3px solid $color-white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+  }
+
+  .evento-minuto {
+    @include flex-center;
+    width: 40px;
+    height: 40px;
+    background: $color-white;
+    border-radius: $border-radius-circle;
+    font-weight: 900;
+    color: $color-primary-dark;
+    font-size: 14px;
+    box-shadow: $shadow-light;
+    border: 2px solid $color-accent;
+    z-index: 2;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    @media (max-width: 768px) {
+      left: 30px;
+      transform: translateX(0);
+    }
+  }
+
+  .evento-icono {
+    @include flex-center;
+    width: 50px;
+    height: 50px;
+    background: $color-white;
+    border-radius: $border-radius-circle;
+    box-shadow: $shadow-medium;
+    z-index: 1;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  .evento-info {
+    flex: 1;
+    padding: 12px 16px;
+    background: $color-white;
+    border-radius: $border-radius-md;
+    box-shadow: $shadow-light;
+    border: 1px solid rgba($color-primary-dark, 0.08);
+
+    .evento-jugador {
+      font-size: 14px;
+      font-weight: 700;
+      color: $color-primary-dark;
+      margin-bottom: 4px;
+      @include text-ellipsis(1);
+    }
+
+    .evento-tipo {
+      font-size: 12px;
+      font-weight: 600;
+      color: $color-gray-medium;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .evento-asistencia {
+      font-size: 11px;
+      color: $color-accent;
+      font-style: italic;
+    }
+  }
+}
+
+// ============================================================================
+// ESTADÍSTICAS
+// ============================================================================
+
+.stat-row {
+  @include flex-between;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba($color-primary-dark, 0.03) 0%, rgba($color-accent, 0.03) 100%);
+  border-radius: $border-radius-md;
+  border: 1px solid rgba($color-primary-dark, 0.08);
+  transition: all $transition-fast;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateX(8px);
+    background: linear-gradient(135deg, rgba($color-accent, 0.08) 0%, rgba($color-primary, 0.08) 100%);
+    border-color: rgba($color-accent, 0.2);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    @include gradient-accent;
+  }
+
+  .stat-label-left,
+  .stat-label-right {
+    font-size: 24px;
+    font-weight: 800;
+    color: $color-primary-dark;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .stat-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: $color-gray-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// ============================================================================
+// MODALES
+// ============================================================================
+
+ion-modal {
+  --border-radius: #{$border-radius-lg};
+  --box-shadow: #{$shadow-heavy};
+
+  ion-toolbar {
+    --background: #{$color-accent};
+    --color: #{$color-white};
+
+    ion-title {
+      font-weight: 700;
+    }
+  }
+
+  &.modal-gol ion-toolbar {
+    @include gradient-success;
+  }
+
+  &.modal-tarjeta-ama ion-toolbar {
+    @include gradient-warning;
+  }
+
+  &.modal-tarjeta-roja ion-toolbar {
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+  }
+}
+
+// Listas en modales
+ion-list {
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+    --border-color: rgba($color-primary-dark, 0.08);
+
+    ion-label[position="stacked"] {
+      font-size: 12px;
+      font-weight: 600;
+      color: $color-gray-medium;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    ion-select,
+    ion-input {
+      --background: #{$color-white};
+      --border-radius: #{$border-radius-md};
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --placeholder-color: #{$color-gray-medium};
+      --color: #{$color-primary-dark};
+      border: 1px solid rgba($color-primary-dark, 0.1);
+      margin-top: 8px;
+      transition: all $transition-fast;
+
+      &:focus-within {
+        border-color: $color-accent;
+        box-shadow: 0 0 0 2px rgba($color-accent, 0.2);
+      }
+    }
+  }
+}
+
+// Segment en modal tarjeta
+ion-segment {
+  margin: 16px 0;
+  background: rgba($color-primary-dark, 0.05);
+
+  ion-segment-button {
+    --color: #{$color-gray-medium};
+    --color-checked: #{$color-white};
+    --background-checked: #{$color-warning};
+    --indicator-color: transparent;
+    font-weight: 600;
+
+    &.segment-button-checked[value="ROJA"] {
+      --background-checked: #{$color-warning};
+    }
+
+    &.segment-button-checked[value="AMARILLA"] {
+      --background-checked: #{$color-programado};
+    }
+  }
+}
+
+// ============================================================================
+// TOAST PERSONALIZADO
+// ============================================================================
+
+ion-toast {
+  --border-radius: #{$border-radius-md};
+  --box-shadow: #{$shadow-heavy};
+  font-weight: 600;
+
+  &.toast-success {
+    --background: #{$color-success};
+  }
+
+  &.toast-danger {
+    --background: #{$color-warning};
+  }
+
+  &.toast-warning {
+    --background: #{$color-programado};
+  }
+}
+
+// ============================================================================
+// ANIMACIONES
+// ============================================================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseLive {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba($color-en-curso, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba($color-en-curso, 0.6);
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// ============================================================================
+// RESPONSIVE DESIGN
+// ============================================================================
+
+@media (max-width: 992px) {
+  .partido-container {
+    padding: 12px;
+  }
+
+  .goles-container {
+    min-width: 160px;
+
+    .goles .gol-numero {
+      font-size: 60px;
+      min-width: 60px;
+    }
+  }
+
+  .equipo .equipo-logo {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .partido-container {
+    padding: 8px;
+  }
+
+  .marcador-principal {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .goles-container {
+    order: 2;
+    min-width: 100%;
+
+    .goles {
+      gap: 16px;
+
+      .gol-numero {
+        font-size: 48px;
+      }
+
+      .gol-separador {
+        font-size: 36px;
+      }
+    }
+  }
+
+  .equipo {
+    flex-direction: row;
+    gap: 16px;
+    width: 100%;
+
+    &.local {
+      order: 1;
+      justify-content: flex-start;
+    }
+
+    &.visitante {
+      order: 3;
+      justify-content: flex-end;
+    }
+
+    .equipo-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 0;
+    }
+
+    .equipo-nombre {
+      text-align: left;
+      font-size: 16px;
+    }
+  }
+
+  .timeline::before {
+    left: 30px;
+  }
+
+  .evento-item {
+    flex-direction: row !important;
+
+    &.local .evento-info,
+    &.visitante .evento-info {
+      margin: 0 0 0 50px !important;
+      text-align: left !important;
+    }
+
+    .evento-minuto {
+      left: 30px !important;
+      transform: translateX(0) !important;
+    }
+  }
+
+  .botones-en-curso {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .partido-info-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .partido-meta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .equipo {
+    .equipo-logo {
+      width: 60px;
+      height: 60px;
+    }
+
+    .equipo-nombre {
+      font-size: 14px;
+    }
+  }
+
+  .evento-info {
+    padding: 8px 12px !important;
+  }
+
+  .stat-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+
+    .stat-label-left,
+    .stat-label-right {
+      order: 1;
+    }
+
+    .stat-name {
+      order: 2;
+    }
+  }
+}
+
+// ============================================================================
+// UTILIDADES
+// ============================================================================
+
+.text-center {
+  text-align: center;
+}
+
+.text-warning {
+  color: $color-warning !important;
+}
+
+.text-success {
+  color: $color-success !important;
+}
+
+.text-primary {
+  color: $color-primary-dark !important;
+}
+
+.bg-gradient-primary {
+  @include gradient-primary;
+  color: $color-white;
+}
+
+.bg-gradient-accent {
+  @include gradient-accent;
+  color: $color-white;
+}
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-1 { margin-top: 8px !important; }
+.mt-2 { margin-top: 16px !important; }
+.mt-3 { margin-top: 24px !important; }
+.mt-4 { margin-top: 32px !important; }
+
+.mb-1 { margin-bottom: 8px !important; }
+.mb-2 { margin-bottom: 16px !important; }
+.mb-3 { margin-bottom: 24px !important; }
+.mb-4 { margin-bottom: 32px !important; }
+
+.p-1 { padding: 8px !important; }
+.p-2 { padding: 16px !important; }
+.p-3 { padding: 24px !important; }
+.p-4 { padding: 32px !important; }
+
+// Scroll personalizado
+ion-content {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba($color-primary-dark, 0.05);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    @include gradient-accent;
+    border-radius: 4px;
+
+    &:hover {
+      background: darken($color-accent, 10%);
+    }
+  }
+}// Estilos para penales - agregar al final de partido-detail.page.scss
+
+.penales-resultado {
+  font-size: 14px;
+  color: $color-gray-medium;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.penales-texto {
+  font-size: 14px;
+  color: $color-accent;
+  margin-left: 8px;
+}
+
+.aviso-penales {
+  @include flex-center;
+  margin-top: 16px;
+  
+  ion-chip {
+    animation: pulseLive 2s infinite;
+  }
+}
+
+.penales-info {
+  background: rgba($color-primary-dark, 0.03);
+  border-radius: $border-radius-md;
+  margin-bottom: 16px;
+  
+  p {
+    margin: 8px 0;
+    color: $color-gray-medium;
+    
+    strong {
+      color: $color-primary-dark;
+    }
+  }
+}

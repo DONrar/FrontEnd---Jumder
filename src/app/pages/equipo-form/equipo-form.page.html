@@ -1,0 +1,614 @@
+<!-- src/app/pages/equipos/equipo-form/equipo-form.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #132440; --color: white;">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/equipos" style="--color: white;"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-icon
+        [name]="isEditMode ? 'create-outline' : 'add-circle-outline'"
+        style="color: #3B9797;">
+      </ion-icon>
+      &nbsp;{{ isEditMode ? 'Editar Equipo' : 'Nuevo Equipo' }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()" style="--color: white;">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Progress bar para formulario -->
+  <div class="form-progress" *ngIf="!loading">
+    <div class="progress-steps">
+      @for (step of ['info', 'colores', 'capitan', 'estado']; track step; let i = $index) {
+        <div
+          class="step-indicator"
+          [class.active]="currentStep === i"
+          [class.completed]="i < currentStep"
+          (click)="goToStep(i)">
+          <div class="step-number">{{ i + 1 }}</div>
+          <span class="step-label">{{ getStepLabel(i) }}</span>
+        </div>
+      }
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="((currentStep + 1) / 4) * 100"></div>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <!-- Loading overlay -->
+    @if (loading) {
+      <div class="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner-large">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+          <h3>Cargando datos del equipo...</h3>
+          <p>Por favor espera un momento</p>
+        </div>
+      </div>
+    }
+
+    <form [formGroup]="equipoForm" (ngSubmit)="guardar()" class="animated-fade-in" *ngIf="!loading">
+      <!-- Información del Equipo -->
+      <ion-card class="card-elevated form-section" [class.active-section]="currentStep === 0">
+        <ion-card-header class="card-header-custom">
+          <div class="card-title-with-icon">
+            <div class="title-icon-container primary">
+              <ion-icon name="information-circle-outline"></ion-icon>
+            </div>
+            <ion-card-title>Información del Equipo</ion-card-title>
+          </div>
+          <ion-card-subtitle>Datos básicos del equipo</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content class="card-content">
+          <div class="form-grid">
+            <!-- Torneo -->
+            <div class="form-group" [class.invalid]="isFieldInvalid('torneoId')">
+              <label class="form-label">
+                <span class="label-text">Torneo</span>
+                <span class="required-badge">*</span>
+              </label>
+              <div class="select-container">
+                <ion-select
+                  formControlName="torneoId"
+                  placeholder="Seleccionar torneo"
+                  interface="popover"
+                  class="custom-select"
+                  (ionFocus)="showTorneosDropdown = true"
+                  (ionBlur)="showTorneosDropdown = false">
+                  <ion-select-option value="" disabled selected hidden>
+                    Selecciona un torneo
+                  </ion-select-option>
+                  @for (torneo of torneosFiltrados(); track torneo.id) {
+                    <ion-select-option [value]="torneo.id">
+                      <div class="option-content">
+                        <span class="option-title">{{ torneo.nombre }}</span>
+                        <span class="option-subtitle">
+                          <ion-icon name="calendar-outline"></ion-icon>
+                          {{ torneo.fechaInicio | date }} - {{ torneo.fechaFin | date }}
+                        </span>
+                      </div>
+                    </ion-select-option>
+                  }
+                </ion-select>
+                <div class="select-arrow">
+                  <ion-icon name="chevron-down-outline"></ion-icon>
+                </div>
+              </div>
+              @if (isFieldInvalid('torneoId')) {
+                <div class="error-message animated-shake">
+                  <ion-icon name="alert-circle-outline"></ion-icon>
+                  {{ getErrorMessage('torneoId') }}
+                </div>
+              }
+              <div class="form-hint">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                Solo se muestran torneos con inscripciones abiertas
+              </div>
+            </div>
+
+            <!-- Nombre del Equipo -->
+            <div class="form-group" [class.invalid]="isFieldInvalid('nombre')">
+              <label class="form-label">
+                <span class="label-text">Nombre del Equipo</span>
+                <span class="required-badge">*</span>
+              </label>
+              <div class="input-container">
+                <ion-input
+                  formControlName="nombre"
+                  type="text"
+                  placeholder="Ej: Los Tigres FC"
+                  class="custom-input"
+                  (ionInput)="onNombreChange($event)"
+                  [maxlength]="50">
+                </ion-input>
+                <div class="input-char-count">
+                  {{ equipoForm.get('nombre')?.value?.length || 0 }}/50
+                </div>
+                <div class="input-icon">
+                  <ion-icon name="people-outline"></ion-icon>
+                </div>
+              </div>
+              @if (isFieldInvalid('nombre')) {
+                <div class="error-message animated-shake">
+                  <ion-icon name="alert-circle-outline"></ion-icon>
+                  {{ getErrorMessage('nombre') }}
+                </div>
+              }
+              <div class="form-hint" *ngIf="equipoForm.get('nombre')?.value">
+                <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                Nombre disponible
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group" [class.focused]="descripcionFocused">
+              <label class="form-label">
+                <span class="label-text">Descripción</span>
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <div class="textarea-container">
+                <ion-textarea
+                  formControlName="descripcion"
+                  placeholder="Describe las características o historia de tu equipo..."
+                  rows="4"
+                  class="custom-textarea"
+                  (ionFocus)="descripcionFocused = true"
+                  (ionBlur)="descripcionFocused = false">
+                </ion-textarea>
+                <div class="textarea-char-count">
+                  {{ equipoForm.get('descripcion')?.value?.length || 0 }}/500
+                </div>
+              </div>
+              <div class="form-hint">
+                <ion-icon name="create-outline"></ion-icon>
+                Máximo 500 caracteres
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Colores del Equipo -->
+      <ion-card class="card-elevated form-section" [class.active-section]="currentStep === 1">
+        <ion-card-header class="card-header-custom">
+          <div class="card-title-with-icon">
+            <div class="title-icon-container success">
+              <ion-icon name="color-palette-outline"></ion-icon>
+            </div>
+            <ion-card-title>Colores del Equipo</ion-card-title>
+          </div>
+          <ion-card-subtitle>Personaliza los colores de tu equipo</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content class="card-content">
+          <div class="colors-grid">
+            <!-- Color Principal -->
+            <div class="color-picker-group">
+              <label class="color-label">
+                <span class="color-label-text">Color Principal</span>
+                <span class="color-hex">{{ equipoForm.get('colorPrincipal')?.value }}</span>
+              </label>
+              <div class="color-input-container">
+                <input
+                  type="color"
+                  formControlName="colorPrincipal"
+                  class="color-input"
+                  (input)="onColorChange('principal')">
+                <div class="color-input-overlay">
+                  <ion-icon name="color-wand-outline"></ion-icon>
+                  <span>Seleccionar</span>
+                </div>
+              </div>
+              <div class="color-presets">
+                @for (color of colorPresets; track color) {
+                  <button
+                    type="button"
+                    class="color-preset"
+                    [style.background-color]="color"
+                    [title]="color"
+                    (click)="setColor('principal', color)">
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="color-preset random"
+                  (click)="generateRandomColor('principal')"
+                  title="Color aleatorio">
+                  <ion-icon name="dice-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Color Secundario -->
+            <div class="color-picker-group">
+              <label class="color-label">
+                <span class="color-label-text">Color Secundario</span>
+                <span class="color-hex">{{ equipoForm.get('colorSecundario')?.value }}</span>
+              </label>
+              <div class="color-input-container">
+                <input
+                  type="color"
+                  formControlName="colorSecundario"
+                  class="color-input"
+                  (input)="onColorChange('secundario')">
+                <div class="color-input-overlay">
+                  <ion-icon name="color-wand-outline"></ion-icon>
+                  <span>Seleccionar</span>
+                </div>
+              </div>
+              <div class="color-presets">
+                @for (color of colorPresets; track color) {
+                  <button
+                    type="button"
+                    class="color-preset"
+                    [style.background-color]="color"
+                    [title]="color"
+                    (click)="setColor('secundario', color)">
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="color-preset random"
+                  (click)="generateRandomColor('secundario')"
+                  title="Color aleatorio">
+                  <ion-icon name="dice-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vista previa de colores -->
+          <div class="color-preview-section">
+            <h4 class="preview-title">
+              <ion-icon name="eye-outline"></ion-icon>
+              Vista Previa
+            </h4>
+            <div class="color-preview-container">
+              <div class="color-preview-card">
+                <div class="preview-header" [style.background]="getGradientPreview()">
+                  <div class="preview-logo">
+                    @if (logoPreview) {
+                      <img [src]="logoPreview" alt="Logo preview" class="preview-logo-img">
+                    } @else {
+                      <div class="preview-logo-placeholder">
+                        <ion-icon name="shield-outline"></ion-icon>
+                      </div>
+                    }
+                  </div>
+                  <div class="preview-team-name">
+                    {{ equipoForm.get('nombre')?.value || 'Nombre del equipo' }}
+                  </div>
+                </div>
+                <div class="preview-content">
+                  <div class="preview-jugador">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                    <div class="preview-jugador-info">
+                      <div class="preview-jugador-name">Jugador de ejemplo</div>
+                      <div class="preview-jugador-number">#10</div>
+                    </div>
+                  </div>
+                  <div class="preview-stats">
+                    <div class="preview-stat">
+                      <span class="stat-value">5</span>
+                      <span class="stat-label">PJ</span>
+                    </div>
+                    <div class="preview-stat">
+                      <span class="stat-value">3</span>
+                      <span class="stat-label">PG</span>
+                    </div>
+                    <div class="preview-stat">
+                      <span class="stat-value">9</span>
+                      <span class="stat-label">PTS</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="preview-actions">
+              <button type="button" class="preview-action-btn" (click)="swapColors()">
+                <ion-icon name="swap-horizontal-outline"></ion-icon>
+                Intercambiar colores
+              </button>
+              <button type="button" class="preview-action-btn" (click)="generateHarmonicColors()">
+                <ion-icon name="color-filter-outline"></ion-icon>
+                Colores armónicos
+              </button>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Capitán del Equipo -->
+      <ion-card class="card-elevated form-section" [class.active-section]="currentStep === 2">
+        <ion-card-header class="card-header-custom">
+          <div class="card-title-with-icon">
+            <div class="title-icon-container warning">
+              <ion-icon name="ribbon-outline"></ion-icon>
+            </div>
+            <ion-card-title>Capitán del Equipo</ion-card-title>
+          </div>
+          <ion-card-subtitle>Selecciona el líder del equipo</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content class="card-content">
+          @if (jugadores.length === 0 && equipoForm.get('torneoId')?.value) {
+            <div class="empty-jugadores-state">
+              <div class="empty-icon">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <h3>No hay jugadores disponibles</h3>
+              <p>Primero debes registrar jugadores en este torneo</p>
+              <ion-button fill="outline" (click)="navegarARegistroJugadores()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                Registrar Jugadores
+              </ion-button>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label class="form-label">
+                <span class="label-text">Seleccionar Capitán</span>
+                <span class="optional-badge">Opcional</span>
+              </label>
+              <div class="capitan-select-container">
+                <ion-select
+                  formControlName="capitanId"
+                  placeholder="Buscar jugador..."
+                  interface="popover"
+                  class="custom-select"
+                  (ionFocus)="showCapitanDropdown = true"
+                  (ionBlur)="showCapitanDropdown = false">
+                  <ion-select-option value="">
+                    Sin capitán (asignar después)
+                  </ion-select-option>
+                  @for (jugador of jugadores; track jugador.id) {
+                    <ion-select-option [value]="jugador.id">
+                      <div class="jugador-option">
+                        <div class="jugador-avatar">
+                          @if (jugador.foto) {
+                            <img [src]="jugador.foto" [alt]="jugador.nombreCompleto">
+                          } @else {
+                            <div class="avatar-placeholder">
+                              {{ getInitials(jugador.nombreCompleto) }}
+                            </div>
+                          }
+                        </div>
+                        <div class="jugador-info">
+                          <span class="jugador-name">{{ jugador.nombreCompleto }}</span>
+                          <span class="jugador-details">
+                            <ion-icon name="id-card-outline"></ion-icon>
+                            {{ jugador.cedula }}
+                          </span>
+                        </div>
+                      </div>
+                    </ion-select-option>
+                  }
+                </ion-select>
+                <div class="select-arrow">
+                  <ion-icon name="chevron-down-outline"></ion-icon>
+                </div>
+              </div>
+
+              <!-- Capitan seleccionado preview -->
+              @if (equipoForm.get('capitanId')?.value) {
+                <div class="capitan-preview animated-fade-in">
+                  @let capitanSeleccionado = getCapitanSeleccionado();
+                  @if (capitanSeleccionado) {
+                    <div class="capitan-card">
+                      <div class="capitan-header">
+                        <div class="capitan-avatar">
+                          @if (capitanSeleccionado.foto) {
+                            <img [src]="capitanSeleccionado.foto" [alt]="capitanSeleccionado.nombreCompleto">
+                          } @else {
+                            <div class="avatar-placeholder large">
+                              {{ getInitials(capitanSeleccionado.nombreCompleto) }}
+                            </div>
+                          }
+                          <div class="capitan-badge">
+                            <ion-icon name="ribbon"></ion-icon>
+                          </div>
+                        </div>
+                        <div class="capitan-info">
+                          <h4>{{ capitanSeleccionado.nombreCompleto }}</h4>
+                          <div class="capitan-details">
+                            <span class="detail-item">
+                              <ion-icon name="id-card-outline"></ion-icon>
+                              {{ capitanSeleccionado.cedula }}
+                            </span>
+                            <span class="detail-item">
+                              <ion-icon name="call-outline"></ion-icon>
+                              {{ capitanSeleccionado.telefono || 'Sin teléfono' }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="capitan-stats">
+                        <div class="stat">
+                          <span class="stat-value">{{ capitanSeleccionado.goles || 0 }}</span>
+                          <span class="stat-label">Goles</span>
+                        </div>
+                        <div class="stat">
+                          <span class="stat-value">{{ capitanSeleccionado.asistencias || 0 }}</span>
+                          <span class="stat-label">Asistencias</span>
+                        </div>
+                        <div class="stat">
+                          <span class="stat-value">{{ capitanSeleccionado.carnetPagado ? 'Sí' : 'No' }}</span>
+                          <span class="stat-label">Carnet pagado</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="no-capitan-hint">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  <span>Puedes asignar un capitán más adelante</span>
+                </div>
+              }
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Estado del Equipo -->
+      <ion-card class="card-elevated form-section" [class.active-section]="currentStep === 3">
+        <ion-card-header class="card-header-custom">
+          <div class="card-title-with-icon">
+            <div class="title-icon-container info">
+              <ion-icon name="checkmark-done-outline"></ion-icon>
+            </div>
+            <ion-card-title>Estado del Equipo</ion-card-title>
+          </div>
+          <ion-card-subtitle>Configura el estado inicial del equipo</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content class="card-content">
+          <div class="status-grid">
+            <!-- Inscripción Pagada -->
+            <div class="toggle-group" [class.active]="equipoForm.get('inscripcionPagada')?.value">
+              <div class="toggle-header">
+                <div class="toggle-icon success">
+                  <ion-icon name="cash-outline"></ion-icon>
+                </div>
+                <div class="toggle-info">
+                  <h4>Inscripción Pagada</h4>
+                  <p>Marca si el equipo ya pagó su inscripción</p>
+                </div>
+              </div>
+              <ion-toggle
+                formControlName="inscripcionPagada"
+                color="success"
+                class="custom-toggle">
+              </ion-toggle>
+            </div>
+
+            <!-- Equipo Activo -->
+            <div class="toggle-group" [class.active]="equipoForm.get('activo')?.value">
+              <div class="toggle-header">
+                <div class="toggle-icon primary">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                </div>
+                <div class="toggle-info">
+                  <h4>Equipo Activo</h4>
+                  <p>Los equipos inactivos no participan en torneos</p>
+                </div>
+              </div>
+              <ion-toggle
+                formControlName="activo"
+                color="primary"
+                class="custom-toggle">
+              </ion-toggle>
+            </div>
+          </div>
+
+          <!-- Resumen y validación -->
+          <div class="validation-summary">
+            <h4 class="summary-title">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+              Resumen del Equipo
+            </h4>
+            <div class="summary-list">
+              <div class="summary-item" [class.valid]="equipoForm.get('nombre')?.valid">
+                <ion-icon
+                  [name]="equipoForm.get('nombre')?.valid ? 'checkmark-circle' : 'close-circle'"
+                  [color]="equipoForm.get('nombre')?.valid ? 'success' : 'medium'">
+                </ion-icon>
+                <span>Nombre del equipo</span>
+              </div>
+              <div class="summary-item" [class.valid]="equipoForm.get('torneoId')?.valid">
+                <ion-icon
+                  [name]="equipoForm.get('torneoId')?.valid ? 'checkmark-circle' : 'close-circle'"
+                  [color]="equipoForm.get('torneoId')?.valid ? 'success' : 'medium'">
+                </ion-icon>
+                <span>Torneo seleccionado</span>
+              </div>
+              <div class="summary-item" [class.valid]="true">
+                <ion-icon name="color-palette" color="success"></ion-icon>
+                <span>Colores personalizados</span>
+              </div>
+              <div class="summary-item" [class.valid]="equipoForm.get('capitanId')?.value">
+                <ion-icon
+                  [name]="equipoForm.get('capitanId')?.value ? 'checkmark-circle' : 'time-outline'"
+                  [color]="equipoForm.get('capitanId')?.value ? 'success' : 'warning'">
+                </ion-icon>
+                <span>Capitán asignado</span>
+              </div>
+            </div>
+            <div class="summary-status">
+              <span class="status-text">
+                {{ equipoForm.valid ? 'Listo para guardar' : 'Completa los campos requeridos' }}
+              </span>
+              <span class="status-percentage">
+                {{ getFormCompletionPercentage() }}% completado
+              </span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Navegación entre pasos -->
+      <div class="form-navigation animated-fade-in">
+        <div class="navigation-buttons">
+          @if (currentStep > 0) {
+            <ion-button fill="outline" class="btn-navigation prev" (click)="previousStep()">
+              <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+              Anterior
+            </ion-button>
+          }
+          <div class="navigation-spacer"></div>
+          @if (currentStep < 3) {
+            <ion-button class="btn-navigation next" (click)="nextStep()">
+              Siguiente
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          } @else {
+            <ion-button
+              class="btn-submit"
+              type="submit"
+              [disabled]="equipoForm.invalid"
+              [class.pulse]="equipoForm.valid">
+              <ion-icon
+                [name]="isEditMode ? 'refresh-outline' : 'checkmark-outline'"
+                slot="start">
+              </ion-icon>
+              {{ isEditMode ? 'Actualizar Equipo' : 'Crear Equipo' }}
+            </ion-button>
+          }
+        </div>
+        <div class="navigation-dots">
+          @for (step of [0, 1, 2, 3]; track step) {
+            <div
+              class="nav-dot"
+              [class.active]="currentStep === step"
+              (click)="goToStep(step)">
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Botón flotante para guardar rápido -->
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end" *ngIf="equipoForm.valid">
+        <ion-fab-button class="fab-save" (click)="guardar()">
+          <ion-icon [name]="isEditMode ? 'refresh' : 'save'"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    </form>
+  </div>
+
+  <!-- Toast mejorado -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [color]="toastColor"
+    [duration]="4000"
+    [position]="'top'"
+    (didDismiss)="showToast = false"
+    class="custom-toast">
+  </ion-toast>
+</ion-content>

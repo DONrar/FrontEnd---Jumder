@@ -1,3 +1,219 @@
+<!-- src/app/app.component.html -->
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-split-pane contentId="main-content">
+    <!-- MENÚ LATERAL MEJORADO -->
+    <ion-menu contentId="main-content" type="overlay" menuId="main-menu" class="premium-menu">
+      <ion-header class="menu-header">
+        <ion-toolbar class="menu-toolbar">
+          <!-- Logo y Nombre del Polideportivo -->
+          <div class="polideportivo-info">
+            <div class="logo-container">
+              <div class="app-logo">
+                <ion-icon name="trophy"></ion-icon>
+              </div>
+            </div>
+            <div class="polideportivo-details">
+              <h2 class="polideportivo-name">{{ polideportivoNombre || 'Gestión Deportiva' }}</h2>
+              <div class="polideportivo-status">
+                <ion-chip class="status-chip" color="success">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+                  <ion-label>Conectado</ion-label>
+                </ion-chip>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="change-btn"
+                  (click)="cambiarPolideportivo()">
+                  <ion-icon name="swap-horizontal" slot="start"></ion-icon>
+                  Cambiar
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="menu-content" scroll-y="false">
+        <!-- Sección principal de navegación -->
+        <div class="menu-sections">
+          <!-- Dashboard -->
+          <div class="menu-section">
+            <h3 class="section-title">
+              <ion-icon name="speedometer"></ion-icon>
+              <span>Dashboard</span>
+            </h3>
+            <ion-list lines="none" class="menu-list">
+              <ion-menu-toggle auto-hide="false">
+                <ion-item
+                  routerDirection="root"
+                  routerLink="/dashboard"
+                  lines="none"
+                  detail="false"
+                  routerLinkActive="selected"
+                  class="menu-item">
+                  <div class="menu-item-content">
+                    <div class="item-icon-container primary">
+                      <ion-icon name="stats-chart"></ion-icon>
+                    </div>
+                    <ion-label>Panel Principal</ion-label>
+                  </div>
+                  <div class="item-badge" slot="end">
+                    <ion-badge color="primary" *ngIf="estadisticas?.totalTorneos">N</ion-badge>
+                  </div>
+                </ion-item>
+              </ion-menu-toggle>
+            </ion-list>
+          </div>
+
+          <!-- Gestión Deportiva -->
+          <div class="menu-section">
+            <h3 class="section-title">
+              <ion-icon name="trophy"></ion-icon>
+              <span>Gestión Deportiva</span>
+            </h3>
+            <ion-list lines="none" class="menu-list">
+              @for (item of deportesPages; track item.title) {
+                <ion-menu-toggle auto-hide="false">
+                  <ion-item
+                    [routerDirection]="'root'"
+                    [routerLink]="[item.url]"
+                    lines="none"
+                    detail="false"
+                    routerLinkActive="selected"
+                    class="menu-item">
+                    <div class="menu-item-content">
+                      <div class="item-icon-container" [class]="item.color">
+                        <ion-icon [name]="item.icon"></ion-icon>
+                      </div>
+                      <ion-label>{{ item.title }}</ion-label>
+                    </div>
+                    <div class="item-badge" slot="end">
+                      @if (item.badge && item.badge > 0) {
+                        <ion-badge [color]="item.badgeColor">{{ item.badge > 99 ? '99+' : item.badge }}</ion-badge>
+                      }
+                    </div>
+                  </ion-item>
+                </ion-menu-toggle>
+              }
+            </ion-list>
+          </div>
+
+          <!-- Punto de Venta -->
+          <div class="menu-section">
+            <h3 class="section-title">
+              <ion-icon name="cash"></ion-icon>
+              <span>Punto de Venta</span>
+            </h3>
+            <ion-list lines="none" class="menu-list">
+              @for (item of ventasPages; track item.title) {
+                <ion-menu-toggle auto-hide="false">
+                  <ion-item
+                    [routerDirection]="'root'"
+                    [routerLink]="[item.url]"
+                    lines="none"
+                    detail="false"
+                    routerLinkActive="selected"
+                    class="menu-item">
+                    <div class="menu-item-content">
+                      <div class="item-icon-container" [class]="item.color">
+                        <ion-icon [name]="item.icon"></ion-icon>
+                      </div>
+                      <ion-label>{{ item.title }}</ion-label>
+                    </div>
+                    <div class="item-badge" slot="end">
+                      @if (item.badge && item.badge > 0) {
+                        <ion-badge [color]="item.badgeColor">{{ item.badge > 99 ? '99+' : item.badge }}</ion-badge>
+                      }
+                    </div>
+                  </ion-item>
+                </ion-menu-toggle>
+              }
+            </ion-list>
+          </div>
+
+          <!-- Configuración -->
+          <div class="menu-section">
+            <h3 class="section-title">
+              <ion-icon name="settings"></ion-icon>
+              <span>Configuración</span>
+            </h3>
+            <ion-list lines="none" class="menu-list">
+              <ion-menu-toggle auto-hide="false">
+                <ion-item
+                  routerDirection="root"
+                  routerLink="/polideportivos/selector"
+                  lines="none"
+                  detail="false"
+                  routerLinkActive="selected"
+                  class="menu-item">
+                  <div class="menu-item-content">
+                    <div class="item-icon-container warning">
+                      <ion-icon name="business"></ion-icon>
+                    </div>
+                    <ion-label>Polideportivos</ion-label>
+                  </div>
+                </ion-item>
+              </ion-menu-toggle>
+
+              <ion-menu-toggle auto-hide="false">
+                <ion-item
+                  routerDirection="root"
+                  routerLink="/configuracion"
+                  lines="none"
+                  detail="false"
+                  routerLinkActive="selected"
+                  class="menu-item">
+                  <div class="menu-item-content">
+                    <div class="item-icon-container medium">
+                      <ion-icon name="cog"></ion-icon>
+                    </div>
+                    <ion-label>Configuración</ion-label>
+                  </div>
+                </ion-item>
+              </ion-menu-toggle>
+            </ion-list>
+          </div>
+        </div>
+
+        <!-- Acción rápida - Cambiar polideportivo flotante -->
+        <div class="floating-action">
+          <ion-button expand="block" fill="solid" color="warning" class="change-polideportivo-btn"
+                     (click)="cambiarPolideportivo()">
+            <ion-icon name="swap-horizontal" slot="start"></ion-icon>
+            Cambiar Polideportivo
+          </ion-button>
+        </div>
+
+        <!-- Footer del menú -->
+        <div class="menu-footer">
+          <div class="user-info">
+            <div class="user-avatar">
+              <ion-icon name="person-circle"></ion-icon>
+            </div>
+            <div class="user-details">
+              <span class="user-name">Administrador</span>
+              <span class="user-role">Super Admin</span>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <ion-button fill="clear" size="small" (click)="abrirAyuda()">
+              <ion-icon name="help-circle"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" size="small" (click)="cerrarSesion()">
+              <ion-icon name="log-out"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div class="app-info">
+            <span class="app-version">Gestión Deportiva v{{ version }}</span>
+            <span class="app-status">{{ getOnlineStatus() }}</span>
+          </div>
+        </div>
+      </ion-content>
+    </ion-menu>
+
+    <!-- Contenido principal -->
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-split-pane>
 </ion-app>

@@ -1,0 +1,141 @@
+<!-- src/app/pages/polideportivos/polideportivo-form/polideportivo-form.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/polideportivos/selector"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Editar Polideportivo' : 'Nuevo Polideportivo' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información del Polideportivo</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="polideportivoForm">
+          <ion-list class="form-list">
+            <!-- Nombre -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('nombre')">
+              <ion-label position="stacked">
+                Nombre del Polideportivo <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="nombre"
+                type="text"
+                placeholder="Ej: Polideportivo Central"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('nombre')">
+                {{ getErrorMessage('nombre') }}
+              </div>
+            </ion-item>
+
+            <!-- Ciudad -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('ciudad')">
+              <ion-label position="stacked">
+                Ciudad <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="ciudad"
+                type="text"
+                placeholder="Ej: Bogotá"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('ciudad')">
+                {{ getErrorMessage('ciudad') }}
+              </div>
+            </ion-item>
+
+            <!-- Dirección -->
+            <ion-item>
+              <ion-label position="stacked">Dirección</ion-label>
+              <ion-input
+                formControlName="direccion"
+                type="text"
+                placeholder="Ej: Calle 123 #45-67"
+                clearInput>
+              </ion-input>
+            </ion-item>
+
+            <!-- Teléfono -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('telefono')">
+              <ion-label position="stacked">Teléfono</ion-label>
+              <ion-input
+                formControlName="telefono"
+                type="tel"
+                placeholder="Ej: 3001234567"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('telefono')">
+                {{ getErrorMessage('telefono') }}
+              </div>
+            </ion-item>
+
+            <!-- Email -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('email')">
+              <ion-label position="stacked">Email</ion-label>
+              <ion-input
+                formControlName="email"
+                type="email"
+                placeholder="Ej: contacto@polideportivo.com"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('email')">
+                {{ getErrorMessage('email') }}
+              </div>
+            </ion-item>
+          </ion-list>
+
+          <!-- Botones de Acción -->
+          <div class="button-container ion-padding">
+            <ion-button
+              expand="block"
+              size="large"
+              (click)="guardar()"
+              [disabled]="loading">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Polideportivo') }}
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              size="large"
+              (click)="cancelar()"
+              [disabled]="loading">
+              Cancelar
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Información adicional -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <h3>📋 Información</h3>
+        <p>Los campos marcados con <span class="required">*</span> son obligatorios.</p>
+        <p>El polideportivo estará activo inmediatamente después de crearlo.</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Toast -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="3000"
+    [color]="toastColor"
+    position="top"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+</ion-content>

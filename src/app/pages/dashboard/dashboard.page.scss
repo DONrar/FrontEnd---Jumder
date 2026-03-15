@@ -1,0 +1,332 @@
+// src/app/pages/dashboard/dashboard.page.scss
+
+.dashboard-container {
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ==================== KPI CARDS ====================
+.kpi-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &.primary {
+    background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    color: white;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, var(--ion-color-success) 0%, var(--ion-color-success-shade) 100%);
+    color: white;
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, var(--ion-color-warning) 0%, var(--ion-color-warning-shade) 100%);
+    color: white;
+  }
+
+  &.tertiary {
+    background: linear-gradient(135deg, var(--ion-color-tertiary) 0%, var(--ion-color-tertiary-shade) 100%);
+    color: white;
+  }
+
+  ion-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .kpi-icon {
+    ion-icon {
+      font-size: 48px;
+      opacity: 0.9;
+    }
+  }
+
+  .kpi-info {
+    flex: 1;
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 900;
+      margin: 0;
+      line-height: 1;
+    }
+  }
+}
+
+// ==================== SUMMARY ITEMS ====================
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 12px;
+
+  ion-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  div {
+    flex: 1;
+
+    h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      margin: 0;
+    }
+  }
+}
+
+// ==================== GRÁFICOS ====================
+.chart-container {
+  padding: 8px 0;
+}
+
+.chart-bar {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .bar-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--ion-color-primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+    }
+  }
+
+  .bar-container {
+    height: 32px;
+    background: var(--ion-color-light);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    position: relative;
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+      border-radius: 16px;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 12px;
+      min-width: 40px;
+
+      &.success {
+        background: linear-gradient(90deg, var(--ion-color-success) 0%, var(--ion-color-success-shade) 100%);
+      }
+    }
+  }
+
+  .bar-value {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+    text-align: right;
+  }
+}
+
+// ==================== STAT BOX ====================
+.stat-box {
+  text-align: center;
+  padding: 20px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: var(--ion-color-primary);
+  }
+
+  .progress-circle {
+    margin-bottom: 12px;
+
+    .value {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--ion-color-primary);
+    }
+
+    .total {
+      font-size: 20px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  p {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+}
+
+// ==================== STAT CARD ====================
+.stat-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-number {
+    font-size: 36px;
+    font-weight: 900;
+    margin: 0 0 12px 0;
+    color: var(--ion-color-dark);
+
+    &.primary {
+      color: var(--ion-color-primary);
+    }
+  }
+
+  .stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+
+    span {
+      &.success {
+        color: var(--ion-color-success);
+      }
+
+      &.warning {
+        color: var(--ion-color-warning);
+      }
+    }
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
+  .kpi-card {
+    ion-card-content {
+      padding: 16px;
+    }
+
+    .kpi-icon {
+      ion-icon {
+        font-size: 36px;
+      }
+    }
+
+    .kpi-info {
+      .kpi-value {
+        font-size: 24px;
+      }
+    }
+  }
+
+  .stat-box {
+    .progress-circle {
+      .value {
+        font-size: 28px;
+      }
+
+      .total {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .stat-card {
+    .stat-number {
+      font-size: 28px;
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .chart-container {
+    padding: 16px 0;
+  }
+
+  .chart-bar {
+    margin-bottom: 24px;
+
+    .bar-container {
+      height: 40px;
+    }
+  }
+}
+
+// ==================== DARK MODE ====================
+@media (prefers-color-scheme: dark) {
+  .kpi-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .summary-item {
+    background: var(--ion-color-step-100);
+  }
+
+  .stat-box {
+    background: var(--ion-color-step-100);
+  }
+
+  .stat-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .chart-bar {
+    .bar-container {
+      background: var(--ion-color-step-100);
+    }
+  }
+}

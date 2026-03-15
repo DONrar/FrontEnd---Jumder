@@ -35,3 +35,64 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+/*
+ * App Global CSS
+ */
+
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+// Estilos globales personalizados
+ion-menu {
+  ion-item.selected {
+    --background: rgba(var(--ion-color-primary-rgb), 0.14);
+    --color: var(--ion-color-primary);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 80px;
+    opacity: 0.5;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    margin: 16px 0 8px;
+    font-size: 24px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// Ajustes para tablets y desktop
+@media (min-width: 768px) {
+  ion-content {
+    --padding-start: 16px;
+    --padding-end: 16px;
+  }
+
+  ion-card {
+    margin: 16px;
+  }
+
+  ion-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}

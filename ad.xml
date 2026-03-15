@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<transaction xmlns="http://www.w3schools.com" transactionName="CGMPT004" application="CGMP" version="01" country="CO" language="ES">
+	<paramsIn>
+		<parameter order="1" name="roleEmployeeid" mandatory="1" type="String" size="2"/>
+		<parameter order="2" name="employeeId" mandatory="1" type="String" size="13"/>
+	</paramsIn>
+	<paramsOut>
+		<list order="1" name="data" mandatory="0">
+			<dto order="1" name="Type" mandatory="0" package="com.bbva.cgmp.dto.customer.response" artifactId="CGMPC001">
+				<dto order="1" name="opportunityCase" mandatory="1" package="com.bbva.cgmp.dto.customer.subsections.opportunityCaseDTO" artifactId="CGMPC001">
+					<parameter order="1" name="id" mandatory="1" type="String" size="18"/>
+				</dto>
+				<parameter order="2" name="opportunityStartDate" mandatory="1" type="Timestamp" size="0"/>
+				<parameter order="3" name="opportunityStageType" mandatory="1" type="Long" size="2"/>
+				<parameter order="4" name="opportunityEndDate" mandatory="0" type="Timestamp" size="0"/>
+				<parameter order="5" name="docNotificationDate" mandatory="0" type="Timestamp" size="0"/>
+				<parameter order="6" name="docSignDate" mandatory="0" type="Timestamp" size="0"/>
+				<parameter order="7" name="updateDate" mandatory="0" type="Timestamp" size="0"/>
+				<dto order="8" name="customer" mandatory="1" package="com.bbva.cgmp.dto.customer.CustomerDTO" artifactId="CGMPC001">
+					<parameter order="1" name="id" mandatory="1" type="String" size="15"/>
+					<parameter order="2" name="name" mandatory="1" type="String" size="100"/>
+					<dto order="3" name="identityDocument" mandatory="1" package="com.bbva.cgmp.dto.customer.subsections.identityDocumentDTO" artifactId="CGMPC001">
+						<dto order="1" name="documentType" mandatory="1" package="com.bbva.cgmp.dto.customer.subsections.documentTypeDTO" artifactId="CGMPC001">
+							<parameter order="1" name="id" mandatory="0" type="String" size="13"/>
+						</dto>
+						<parameter order="2" name="documentNumber" mandatory="0" type="String" size="13"/>
+					</dto>
+				</dto>
+				<dto order="9" name="product" mandatory="1" package="com.bbva.cgmp.dto.customer.subsections.ProductResponseDTO" artifactId="CGMPC001">
+					<parameter order="1" name="id" mandatory="0" type="String" size="1"/>
+					<parameter order="2" name="name" mandatory="1" type="String" size="40"/>
+					<dto order="3" name="subproduct" mandatory="1" package="com.bbva.cgmp.dto.product.subsections.subproductDTO" artifactId="CGMPC002">
+						<parameter order="1" name="id" mandatory="0" type="String" size="14"/>
+						<parameter order="2" name="name" mandatory="0" type="String" size="70"/>
+					</dto>
+				</dto>
+                <parameter order="10" name="contractBranchId" mandatory="0" type="String" size="6"/>
+                <parameter order="11" name="userName" mandatory="0" type="String" size="100"/>
+                <parameter order="12" name="reassignedCase" mandatory="0" type="String" size="1"/>
+                <parameter order="13" name="userAuditId" mandatory="0" type="String" size="20"/>
+            </dto>
+		</list>
+	</paramsOut>
+	<description>Transaction to get the list of cases based on the id of the employee of BBVA Contigo</description>
+</transaction>

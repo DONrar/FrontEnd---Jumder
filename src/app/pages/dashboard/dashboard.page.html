@@ -1,0 +1,387 @@
+<!-- src/app/pages/dashboard/dashboard.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="stats-chart-outline"></ion-icon>
+      Dashboard
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportarReporte()">
+        <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarDatos()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="segmentValue" (ionChange)="onSegmentChange($event)" mode="md">
+      <ion-segment-button value="general">
+        <ion-label>General</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="torneos">
+        <ion-label>Torneos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="ventas">
+        <ion-label>Ventas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-padding">
+    <ion-skeleton-text [animated]="true" style="width: 100%; height: 150px"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" style="width: 100%; height: 150px"></ion-skeleton-text>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-container">
+    <!-- GENERAL -->
+    <div *ngIf="segmentValue === 'general'">
+      <!-- KPIs Principales -->
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" sizeMd="6" sizeLg="3">
+            <ion-card class="kpi-card primary">
+              <ion-card-content>
+                <div class="kpi-icon">
+                  <ion-icon name="trophy-outline"></ion-icon>
+                </div>
+                <div class="kpi-info">
+                  <h3>Torneos Activos</h3>
+                  <p class="kpi-value">{{ torneosActivos }}</p>
+
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" sizeMd="6" sizeLg="3">
+            <ion-card class="kpi-card success" *ngIf="resumenVentas">
+              <ion-card-content>
+                <div class="kpi-icon">
+                  <ion-icon name="cash-outline"></ion-icon>
+                </div>
+                <div class="kpi-info">
+                  <h3>Ingresos Ventas</h3>
+                  <p class="kpi-value">{{ formatCurrency(resumenVentas.totalIngresos) }}</p>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" sizeMd="6" sizeLg="3">
+            <ion-card class="kpi-card warning" *ngIf="resumenVentas">
+              <ion-card-content>
+                <div class="kpi-icon">
+                  <ion-icon name="cart-outline"></ion-icon>
+                </div>
+                <div class="kpi-info">
+                  <h3>Total Ventas</h3>
+                  <p class="kpi-value">{{ resumenVentas.totalVentas }}</p>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" sizeMd="6" sizeLg="3">
+            <ion-card class="kpi-card tertiary" *ngIf="resumenTorneo">
+              <ion-card-content>
+                <div class="kpi-icon">
+                  <ion-icon name="people-outline"></ion-icon>
+                </div>
+                <div class="kpi-info">
+                  <h3>Jugadores</h3>
+                  <p class="kpi-value">{{ resumenTorneo.totalJugadores }}</p>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <!-- Resumen Rápido -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Resumen Rápido</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" sizeMd="6">
+                <div class="summary-item">
+                  <ion-icon name="trophy-outline" color="primary"></ion-icon>
+                  <div>
+                    <h4>Torneos Totales</h4>
+                    <p>{{ torneos.length }} torneos registrados</p>
+                  </div>
+                </div>
+              </ion-col>
+              <ion-col size="12" sizeMd="6" *ngIf="resumenVentas">
+                <div class="summary-item">
+                  <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                  <div>
+                    <h4>Ventas Completadas</h4>
+                    <p>{{ resumenVentas.ventasCompletadas }} de {{ resumenVentas.totalVentas }}</p>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Gráficos -->
+      <ion-grid *ngIf="resumenVentas">
+        <ion-row>
+          <ion-col size="12" sizeMd="6">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Ventas por Método de Pago</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="chart-container">
+                  <div *ngFor="let item of ventasPorMetodo" class="chart-bar">
+                    <div class="bar-label">{{ item.name }}</div>
+                    <div class="bar-container">
+                      <div
+                        class="bar-fill"
+                        [style.width]="getPercentage(item.value, resumenVentas.totalIngresos) + '%'">
+                      </div>
+                    </div>
+                    <div class="bar-value">{{ formatCurrency(item.value) }}</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+
+          <ion-col size="12" sizeMd="6">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title>Top 5 Productos</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="chart-container">
+                  <div *ngFor="let item of productosMasVendidos; let i = index" class="chart-bar">
+                    <div class="bar-label">
+                      <span class="rank">{{ i + 1 }}</span>
+                      {{ item.name }}
+                    </div>
+                    <div class="bar-container">
+                      <div
+                        class="bar-fill success"
+                        [style.width]="getPercentage(item.value, productosMasVendidos[0]?.value || 1) + '%'">
+                      </div>
+                    </div>
+                    <div class="bar-value">{{ item.value }} unidades</div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <!-- TORNEOS -->
+    <div *ngIf="segmentValue === 'torneos'">
+      <!-- Selector de Torneo -->
+      <ion-card>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">Seleccionar Torneo</ion-label>
+            <ion-select
+              [(ngModel)]="torneoSeleccionado"
+              (ionChange)="onTorneoChange($event)"
+              placeholder="Selecciona un torneo">
+              <ion-select-option *ngFor="let torneo of torneos" [value]="torneo.id">
+                {{ torneo.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Resumen Torneo -->
+      <div *ngIf="resumenTorneo">
+        <!-- Estadísticas de Equipos -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{ resumenTorneo.nombreTorneo }}</ion-card-title>
+            <ion-chip [color]="resumenTorneo.estado === 'EN_CURSO' ? 'success' : 'medium'">
+              <ion-label>{{ resumenTorneo.estado }}</ion-label>
+            </ion-chip>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" sizeMd="4">
+                  <div class="stat-box">
+                    <h3>Equipos</h3>
+                    <div class="progress-circle">
+                      <span class="value">{{ resumenTorneo.equiposPagos }}</span>
+                      <span class="total">/ {{ resumenTorneo.totalEquipos }}</span>
+                    </div>
+                    <p>{{ resumenTorneo.equiposPendientes }} pendientes de pago</p>
+                  </div>
+                </ion-col>
+                <ion-col size="12" sizeMd="4">
+                  <div class="stat-box">
+                    <h3>Jugadores</h3>
+                    <div class="progress-circle">
+                      <span class="value">{{ resumenTorneo.jugadoresPagos }}</span>
+                      <span class="total">/ {{ resumenTorneo.totalJugadores }}</span>
+                    </div>
+                    <p>{{ resumenTorneo.jugadoresPendientes }} pendientes de pago</p>
+                  </div>
+                </ion-col>
+                <ion-col size="12" sizeMd="4">
+                  <div class="stat-box">
+                    <h3>Partidos</h3>
+                    <div class="progress-circle">
+                      <span class="value">{{ resumenTorneo.partidosJugados }}</span>
+                      <span class="total">/ {{ resumenTorneo.totalPartidos }}</span>
+                    </div>
+                    <p>{{ resumenTorneo.partidosPendientes }} por jugar</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Ingresos -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Ingresos del Torneo</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-icon name="cash-outline" color="warning" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Carnets</h3>
+                  <p>{{ formatCurrency(resumenTorneo.ingresosCarnets) }}</p>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-icon name="cash-outline" color="success" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Inscripciones</h3>
+                  <p>{{ formatCurrency(resumenTorneo.ingresosInscripciones) }}</p>
+                </ion-label>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-icon name="cash-outline" color="primary" slot="start"></ion-icon>
+                <ion-label color="primary">
+                  <h2><strong>Total</strong></h2>
+                  <p><strong>{{ formatCurrency(resumenTorneo.totalIngresos) }}</strong></p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- VENTAS -->
+    <div *ngIf="segmentValue === 'ventas'">
+      <!-- Filtros de Fecha -->
+      <ion-card>
+        <ion-card-content>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" sizeMd="6">
+                <ion-item>
+                  <ion-label position="stacked">Fecha Inicio</ion-label>
+                  <ion-input
+                    [(ngModel)]="fechaInicio"
+                    type="date"
+                    (ionChange)="onFechaChange()">
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" sizeMd="6">
+                <ion-item>
+                  <ion-label position="stacked">Fecha Fin</ion-label>
+                  <ion-input
+                    [(ngModel)]="fechaFin"
+                    type="date"
+                    (ionChange)="onFechaChange()">
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Estadísticas de Ventas -->
+      <div *ngIf="resumenVentas">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" sizeMd="4">
+              <ion-card class="stat-card">
+                <ion-card-content>
+                  <h3>Total Ventas</h3>
+                  <p class="stat-number">{{ resumenVentas.totalVentas }}</p>
+                  <div class="stat-details">
+                    <span class="success">✓ {{ resumenVentas.ventasCompletadas }} completadas</span>
+                    <span class="warning">⏳ {{ resumenVentas.ventasPendientes }} pendientes</span>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" sizeMd="8">
+              <ion-card class="stat-card">
+                <ion-card-content>
+                  <h3>Ingresos Totales</h3>
+                  <p class="stat-number primary">{{ formatCurrency(resumenVentas.totalIngresos) }}</p>
+                  <div class="stat-details">
+                    <span>Período: {{ formatDate(fechaInicio) }} - {{ formatDate(fechaFin) }}</span>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- Distribución por Método de Pago -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Distribución por Método de Pago</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item *ngFor="let item of ventasPorMetodo">
+                <ion-label>
+                  <h3>{{ item.name }}</h3>
+                  <p>{{ getPercentage(item.value, resumenVentas.totalIngresos) }}% del total</p>
+                </ion-label>
+                <ion-badge slot="end" color="primary">
+                  {{ formatCurrency(item.value) }}
+                </ion-badge>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="2000"
+    [color]="toastColor"
+    position="bottom"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+</ion-content>

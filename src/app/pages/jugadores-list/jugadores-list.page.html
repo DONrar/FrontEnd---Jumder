@@ -1,0 +1,511 @@
+<!-- src/app/pages/jugadores/jugadores-list/jugadores-list.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar style="--background: #132440; --color: white;">
+    @if (equipoId || torneoId) {
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/equipos" style="--color: white;"></ion-back-button>
+      </ion-buttons>
+    }
+    <ion-title>
+      <ion-icon name="people-outline" style="color: #3B9797;"></ion-icon>
+      &nbsp;
+      @if (equipoNombre) {
+        {{ equipoNombre }} - Jugadores
+      } @else if (torneoId) {
+        Jugadores del Torneo
+      } @else {
+        Todos los Jugadores
+      }
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarJugadores()" style="--color: white;">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+
+       <ion-button (click)="crearJugador()" style="--color: white;">
+    <ion-icon name="person-add-outline"></ion-icon>
+  </ion-button>
+      <ion-button (click)="mostrarFiltrosAvanzados()" style="--color: white;">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Barra de búsqueda mejorada -->
+  <ion-toolbar class="search-toolbar">
+    <ion-searchbar
+      [(ngModel)]="searchText"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Buscar por nombre, cédula o equipo..."
+      [debounce]="300"
+      animated="true"
+      class="custom-searchbar">
+    </ion-searchbar>
+    <ion-button fill="clear" size="small" (click)="toggleFiltros()">
+      <ion-icon name="funnel" [color]="filtrosVisibles ? 'primary' : 'medium'"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+
+  <!-- Filtros avanzados (colapsable) -->
+  @if (filtrosVisibles) {
+    <div class="advanced-filters animated-slide-down">
+      <div class="filters-container">
+        <!-- Filtro por posición -->
+        <div class="filter-group">
+          <label class="filter-label">Posición</label>
+          <div class="chips-container">
+            <ion-chip [outline]="filtroPosicion !== 'todos'" (click)="aplicarFiltroPosicion('todos')"
+                     [class.active]="filtroPosicion === 'todos'">
+              <ion-label>Todas</ion-label>
+            </ion-chip>
+            @for (posicion of posicionesUnicas; track posicion) {
+              <ion-chip [outline]="filtroPosicion !== posicion" (click)="aplicarFiltroPosicion(posicion)"
+                       [class.active]="filtroPosicion === posicion" [color]="getPosicionColor(posicion)">
+                <ion-icon [name]="getPosicionIcon(posicion)"></ion-icon>
+                <ion-label>{{ getPosicionNombre(posicion) }}</ion-label>
+              </ion-chip>
+            }
+          </div>
+        </div>
+
+        <!-- Filtro por estado -->
+        <div class="filter-group">
+          <label class="filter-label">Estado del Jugador</label>
+          <div class="chips-container">
+            <ion-chip [outline]="filtroEstado !== 'todos'" (click)="aplicarFiltroEstado('todos')"
+                     [class.active]="filtroEstado === 'todos'">
+              <ion-label>Todos</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroEstado !== 'activos'" (click)="aplicarFiltroEstado('activos')"
+                     [class.active]="filtroEstado === 'activos'" color="success">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <ion-label>Activos</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroEstado !== 'inactivos'" (click)="aplicarFiltroEstado('inactivos')"
+                     [class.active]="filtroEstado === 'inactivos'" color="medium">
+              <ion-icon name="close-circle"></ion-icon>
+              <ion-label>Inactivos</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+
+        <!-- Filtro por pago -->
+        <div class="filter-group">
+          <label class="filter-label">Estado de Pago</label>
+          <div class="chips-container">
+            <ion-chip [outline]="filtroPago !== 'todos'" (click)="aplicarFiltroPago('todos')"
+                     [class.active]="filtroPago === 'todos'">
+              <ion-label>Todos</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroPago !== 'pagados'" (click)="aplicarFiltroPago('pagados')"
+                     [class.active]="filtroPago === 'pagados'" color="success">
+              <ion-icon name="cash"></ion-icon>
+              <ion-label>Pagados</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroPago !== 'sin-pagar'" (click)="aplicarFiltroPago('sin-pagar')"
+                     [class.active]="filtroPago === 'sin-pagar'" color="warning">
+              <ion-icon name="alert-circle"></ion-icon>
+              <ion-label>Sin Pagar</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+
+        <!-- Filtro por verificación -->
+        @if (!equipoId) {
+          <div class="filter-group">
+            <label class="filter-label">Verificación</label>
+            <div class="chips-container">
+              <ion-chip [outline]="filtroVerificado !== 'todos'" (click)="aplicarFiltroVerificado('todos')"
+                       [class.active]="filtroVerificado === 'todos'">
+                <ion-label>Todos</ion-label>
+              </ion-chip>
+              <ion-chip [outline]="filtroVerificado !== 'verificados'" (click)="aplicarFiltroVerificado('verificados')"
+                       [class.active]="filtroVerificado === 'verificados'" color="success">
+                <ion-icon name="shield-checkmark"></ion-icon>
+                <ion-label>Verificados</ion-label>
+              </ion-chip>
+              <ion-chip [outline]="filtroVerificado !== 'no-verificados'" (click)="aplicarFiltroVerificado('no-verificados')"
+                       [class.active]="filtroVerificado === 'no-verificados'" color="warning">
+                <ion-icon name="warning"></ion-icon>
+                <ion-label>No Verificados</ion-label>
+              </ion-chip>
+            </div>
+          </div>
+        }
+
+        <!-- Filtro por capitán -->
+        <div class="filter-group">
+          <label class="filter-label">Capitán</label>
+          <div class="chips-container">
+            <ion-chip [outline]="filtroCapitan !== 'todos'" (click)="aplicarFiltroCapitan('todos')"
+                     [class.active]="filtroCapitan === 'todos'">
+              <ion-label>Todos</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroCapitan !== 'capitanes'" (click)="aplicarFiltroCapitan('capitanes')"
+                     [class.active]="filtroCapitan === 'capitanes'" class="gold-chip">
+              <ion-icon name="ribbon"></ion-icon>
+              <ion-label>Solo Capitanes</ion-label>
+            </ion-chip>
+            <ion-chip [outline]="filtroCapitan !== 'no-capitanes'" (click)="aplicarFiltroCapitan('no-capitanes')"
+                     [class.active]="filtroCapitan === 'no-capitanes'">
+              <ion-icon name="person"></ion-icon>
+              <ion-label>No Capitanes</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Refresher mejorado -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="arrow-down"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="container">
+    <!-- Tarjeta de resumen rápida -->
+    @if (!loading && jugadores.length > 0) {
+      <div class="quick-stats animated-fade-in">
+        <ion-card class="card-elevated stats-card">
+          <ion-card-content>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-icon-container primary">
+                  <ion-icon name="people"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">{{ jugadores.length }}</span>
+                  <span class="stat-label">Jugadores Totales</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon-container success">
+                  <ion-icon name="cash"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">{{ jugadoresPagados }}</span>
+                  <span class="stat-label">Carnets Pagados</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon-container warning">
+                  <ion-icon name="alert-circle"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">{{ jugadoresSinPagar }}</span>
+                  <span class="stat-label">Pendientes de Pago</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon-container gold">
+                  <ion-icon name="ribbon"></ion-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">{{ jugadoresCapitanes }}</span>
+                  <span class="stat-label">Capitanes</span>
+                </div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- Loading Skeleton mejorado -->
+    @if (loading) {
+      <div class="loading-skeleton animated-fade-in">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <ion-card class="card-skeleton">
+            <div class="skeleton-header">
+              <ion-skeleton-text [animated]="true" style="width: 70px; height: 70px; border-radius: 50%;"></ion-skeleton-text>
+              <div class="skeleton-title">
+                <ion-skeleton-text [animated]="true" style="width: 60%; height: 20px;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 40%; height: 16px; margin-top: 8px;"></ion-skeleton-text>
+              </div>
+            </div>
+            <ion-card-content>
+              <div class="skeleton-stats">
+                @for (stat of [1, 2, 3, 4]; track stat) {
+                  <ion-skeleton-text [animated]="true" style="width: 50px; height: 50px; border-radius: 8px;"></ion-skeleton-text>
+                }
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    }
+
+    <!-- Lista de jugadores -->
+    @if (!loading) {
+      @if (jugadoresFiltrados.length === 0) {
+        <div class="empty-state animated-fade-in">
+          <div class="empty-icon-container">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <h2>No hay jugadores</h2>
+          <p>
+            @if (searchText || filtroPosicion !== 'todos' || filtroEstado !== 'todos') {
+              No se encontraron jugadores con los filtros aplicados
+            } @else if (equipoId) {
+              Este equipo aún no tiene jugadores registrados
+            } @else if (torneoId) {
+              Este torneo aún no tiene jugadores registrados
+            } @else {
+              Aún no hay jugadores registrados
+            }
+          </p>
+          <div class="empty-actions">
+            <ion-button (click)="crearJugador()" class="btn-primary">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              Registrar primer jugador
+            </ion-button>
+            @if (searchText || filtroPosicion !== 'todos' || filtroEstado !== 'todos') {
+              <ion-button (click)="limpiarFiltros()" fill="outline" class="btn-secondary">
+                <ion-icon name="close-outline" slot="start"></ion-icon>
+                Limpiar filtros
+              </ion-button>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="jugadores-grid">
+          @for (jugador of jugadoresFiltrados; track jugador.id) {
+            <ion-card (click)="verJugador(jugador)" class="card-elevated jugador-card"
+                     [class.inactivo]="!jugador.activo"
+                     [class.pagado]="jugador.carnetPagado"
+                     [class.capitan]="jugador.esCapitan">
+
+              <!-- Cabecera con gradiente por posición o capitán -->
+              <div class="jugador-header" [style.background]="getGradientByPosition(jugador.posicion, jugador.esCapitan)">
+                <div class="jugador-avatar">
+                  @if (jugador.foto) {
+                    <img [src]="jugador.foto" [alt]="jugador.nombreCompleto" class="avatar-img" />
+                  } @else {
+                    <div class="avatar-placeholder">
+                      <ion-icon name="person"></ion-icon>
+                    </div>
+                  }
+
+                  <!-- Badge de capitán -->
+                  @if (jugador.esCapitan) {
+                    <div class="capitan-badge">
+                      <ion-icon name="ribbon"></ion-icon>
+                    </div>
+                  }
+                </div>
+
+                <div class="jugador-title-section">
+                  <h3 class="jugador-nombre">{{ jugador.nombreCompleto }}</h3>
+                  <p class="jugador-cedula">{{ jugador.cedula }}</p>
+                  <div class="jugador-badges">
+                    @if (!jugador.activo) {
+                      <ion-badge class="status-badge danger">
+                        <ion-icon name="close-circle"></ion-icon>
+                        Inactivo
+                      </ion-badge>
+                    }
+                    @if (jugador.verificado) {
+                      <ion-badge class="verification-badge success">
+                        <ion-icon name="shield-checkmark"></ion-icon>
+                        Verificado
+                      </ion-badge>
+                    }
+                    @if (!jugador.carnetPagado) {
+                      <ion-badge class="payment-badge warning">
+                        <ion-icon name="cash"></ion-icon>
+                        Pendiente
+                      </ion-badge>
+                    } @else {
+                      <ion-badge class="payment-badge success">
+                        <ion-icon name="checkmark-circle"></ion-icon>
+                        Pagado
+                      </ion-badge>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <ion-card-content class="card-content">
+                <!-- Información principal -->
+                <div class="info-grid">
+                  <!-- Posición -->
+                  <div class="info-item">
+                    <div class="info-icon-container" [class]="getPosicionColorClass(jugador.posicion)">
+                      <ion-icon [name]="getPosicionIcon(jugador.posicion)"></ion-icon>
+                    </div>
+                    <div class="info-content">
+                      <span class="info-label">Posición</span>
+                      <span class="info-value">{{ getPosicionNombre(jugador.posicion) }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Dorsal -->
+                  @if (jugador.numeroCamiseta) {
+                    <div class="info-item">
+                      <div class="dorsal-circle" [style.background]="getGradientByPosition(jugador.posicion, jugador.esCapitan)">
+                        <span class="dorsal-number">{{ jugador.numeroCamiseta }}</span>
+                      </div>
+                      <div class="info-content">
+                        <span class="info-label">Dorsal</span>
+                        <span class="info-value">#{{ jugador.numeroCamiseta }}</span>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Equipo (si no estamos en vista de equipo) -->
+                  @if (!equipoId && jugador.equipoNombre) {
+                    <div class="info-item">
+                      <div class="info-icon-container secondary">
+                        <ion-icon name="shield"></ion-icon>
+                      </div>
+                      <div class="info-content">
+                        <span class="info-label">Equipo</span>
+                        <span class="info-value">{{ jugador.equipoNombre }}</span>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Edad -->
+                  @if (jugador.fechaNacimiento) {
+                    <div class="info-item">
+                      <div class="info-icon-container tertiary">
+                        <ion-icon name="calendar"></ion-icon>
+                      </div>
+                      <div class="info-content">
+                        <span class="info-label">Edad</span>
+                        <span class="info-value">{{ calcularEdad(jugador.fechaNacimiento) }} años</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Estadísticas -->
+                @if (tieneEstadisticas(jugador)) {
+                  <div class="stats-container">
+                    <div class="stats-header">
+                      <h4>Estadísticas</h4>
+                    </div>
+                    <div class="stats-grid-small">
+                      <div class="stat-box goal">
+                        <span class="stat-number">{{ jugador.goles || 0 }}</span>
+                        <span class="stat-label">Goles</span>
+                      </div>
+                      <div class="stat-box assist">
+                        <span class="stat-number">{{ jugador.asistencias || 0 }}</span>
+                        <span class="stat-label">Asist.</span>
+                      </div>
+                      <div class="stat-box yellow">
+                        <span class="stat-number">{{ jugador.tarjetasAmarillas || 0 }}</span>
+                        <span class="stat-label">Amarillas</span>
+                      </div>
+                      <div class="stat-box red">
+                        <span class="stat-number">{{ jugador.tarjetasRojas || 0 }}</span>
+                        <span class="stat-label">Rojas</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Acciones rápidas -->
+                <div class="quick-actions">
+                  <ion-button fill="clear" size="small" class="btn-action primary"
+                            (click)="editarJugador(jugador, $event)">
+                    <ion-icon name="create" slot="start"></ion-icon>
+                    Editar
+                  </ion-button>
+
+                  @if (!jugador.carnetPagado) {
+                    <ion-button fill="clear" size="small" class="btn-action success"
+                              (click)="pagarCarnet(jugador, $event)">
+                      <ion-icon name="cash" slot="start"></ion-icon>
+                      Pagar
+                    </ion-button>
+                  }
+
+                  @if (!jugador.verificado) {
+                    <ion-button fill="clear" size="small" class="btn-action warning"
+                              (click)="verificarJugador(jugador, $event)">
+                      <ion-icon name="shield-checkmark" slot="start"></ion-icon>
+                      Verificar
+                    </ion-button>
+                  }
+
+                  <ion-button fill="clear" size="small" class="btn-action danger"
+                            (click)="eliminarJugador(jugador, $event)">
+                    <ion-icon name="trash" slot="start"></ion-icon>
+                    Eliminar
+                  </ion-button>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          }
+        </div>
+
+        <!-- Footer con resumen -->
+        <div class="summary-footer animated-fade-in">
+          <div class="footer-content">
+            <div class="footer-info">
+              <ion-chip class="summary-chip">
+                <ion-icon name="people"></ion-icon>
+                <ion-label>{{ jugadoresFiltrados.length }} de {{ jugadores.length }} jugadores</ion-label>
+              </ion-chip>
+              <div class="footer-actions">
+                <ion-button fill="clear" size="small" (click)="exportarLista()">
+                  <ion-icon name="download-outline" slot="start"></ion-icon>
+                  Exportar
+                </ion-button> 
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- FAB para crear jugadores - SIEMPRE VISIBLE -->
+<ion-fab slot="fixed" vertical="bottom" horizontal="end">
+  <ion-fab-button class="fab-primary" (click)="crearJugador()">
+    <ion-icon name="person-add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+  <!-- Toast -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [color]="toastColor"
+    [duration]="3000"
+    [position]="'top'"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+
+  <!-- Modal de filtros avanzados -->
+  <ion-modal [isOpen]="showFiltrosModal" (didDismiss)="showFiltrosModal = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar style="--background: #132440; --color: white;">
+          <ion-title>Filtros Avanzados</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="showFiltrosModal = false" style="--color: white;">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <div class="modal-container">
+          <h3>Configuración de Filtros Avanzados</h3>
+          <p>Aquí puedes configurar filtros más específicos para tus jugadores.</p>
+          <p>Próximamente: filtros por edad, fecha de registro, equipo específico, etc.</p>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

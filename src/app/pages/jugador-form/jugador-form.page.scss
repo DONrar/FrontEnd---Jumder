@@ -1,0 +1,338 @@
+/* jugador-form.page.scss */
+
+/* Fondo general de la aplicación */
+ion-content {
+  --background: #f8f9fa;
+}
+
+.form-container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Tarjetas del formulario */
+ion-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin: 16px 16px 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+ion-card-header {
+  background: linear-gradient(135deg, #16476A 0%, #132440 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px 16px;
+
+  ion-card-title {
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 22px;
+      color: #3B9797;
+    }
+  }
+}
+
+ion-card-content {
+  padding: 24px;
+
+  form {
+    animation: fadeIn 0.4s ease-out;
+  }
+}
+
+/* Lista del formulario */
+.form-list {
+  background: transparent;
+  padding: 0;
+}
+
+/* Estilos para los items del formulario */
+ion-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --border-color: rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    --border-color: #16476A;
+    --box-shadow: 0 0 0 1px rgba(22, 71, 106, 0.2);
+    transform: translateY(-1px);
+  }
+
+  ion-label {
+    color: #132440;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+
+    &[position="stacked"] {
+      transform: translateY(100%) scale(1);
+      margin-bottom: 0;
+    }
+
+    .required {
+      color: #BF092F;
+    }
+  }
+
+  ion-input, ion-select, ion-textarea {
+    --background: rgba(59, 151, 151, 0.05);
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    min-height: 50px;
+    transition: all 0.3s ease;
+
+    &:focus-within {
+      border-color: #16476A;
+      box-shadow: 0 0 0 2px rgba(22, 71, 106, 0.1);
+    }
+  }
+
+  ion-select::part(text) {
+    color: #132440;
+  }
+
+  /* Toggle items sin borde */
+  &[lines="none"] {
+    --border-color: transparent;
+    --inner-border-width: 0;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(59, 151, 151, 0.05);
+
+    ion-label {
+      h3 {
+        margin: 0 0 4px 0;
+        color: #132440;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      p {
+        margin: 0;
+        color: #666;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+    }
+
+    ion-toggle {
+      --background: #e0e0e0;
+      --background-checked: #3B9797;
+      --handle-background: white;
+      --handle-background-checked: white;
+    }
+  }
+}
+
+/* Estado de validación */
+ion-item.ion-invalid {
+  --border-color: #BF092F;
+
+  ion-label {
+    color: #BF092F;
+  }
+
+  ion-input, ion-select, ion-textarea {
+    border-color: #BF092F;
+    background: rgba(191, 9, 47, 0.05);
+  }
+}
+
+/* Nota para la edad */
+ion-note {
+  color: #3B9797;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+  padding-left: 16px;
+  display: block;
+}
+
+/* Contenedor de botones */
+.button-container {
+  margin: 32px 0;
+  padding: 0;
+
+  ion-button {
+    --border-radius: 12px;
+    height: 56px;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 12px;
+
+    ion-icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+
+    &:first-of-type {
+      --background: linear-gradient(135deg, #16476A 0%, #3B9797 100%);
+      --background-activated: linear-gradient(135deg, #132440 0%, #16476A 100%);
+      --background-hover: linear-gradient(135deg, #3B9797 0%, #4ab3b3 100%);
+      --color: white;
+      --box-shadow: 0 4px 12px rgba(22, 71, 106, 0.3);
+    }
+
+    &:last-of-type {
+      --border-color: #16476A;
+      --color: #16476A;
+    }
+
+    &[disabled] {
+      opacity: 0.6;
+    }
+  }
+}
+
+/* Card de información */
+.info-card {
+  background: rgba(59, 151, 151, 0.05);
+  border: 1px solid rgba(59, 151, 151, 0.2);
+  margin-top: 24px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #132440;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 8px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+
+    strong {
+      color: #16476A;
+      font-weight: 600;
+    }
+
+    .required {
+      color: #BF092F;
+      font-weight: 600;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* Toast personalizado */
+ion-toast {
+  --background: #3B9797;
+  --color: white;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &[color="danger"] {
+    --background: #BF092F;
+  }
+
+  &[color="warning"] {
+    --background: #ffc107;
+    --color: #000;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 12px;
+    padding-bottom: 80px;
+  }
+
+  ion-card {
+    margin: 12px 12px 20px;
+  }
+
+  ion-card-header {
+    padding: 16px 16px 12px;
+
+    ion-card-title {
+      font-size: 18px;
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  ion-item {
+    margin-bottom: 16px;
+
+    &[lines="none"] {
+      margin-bottom: 10px;
+    }
+  }
+
+  .button-container {
+    margin: 24px 0;
+
+    ion-button {
+      height: 48px;
+      font-size: 15px;
+    }
+  }
+
+  .info-card {
+    h3 {
+      font-size: 16px;
+    }
+
+    li {
+      font-size: 13px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  ion-card-header {
+    text-align: center;
+  }
+}

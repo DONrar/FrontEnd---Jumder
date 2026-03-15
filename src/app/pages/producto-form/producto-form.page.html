@@ -1,0 +1,212 @@
+<!-- src/app/pages/productos/producto-form/producto-form.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/productos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Editar Producto' : 'Nuevo Producto' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información del Producto</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="productoForm">
+          <ion-list class="form-list">
+            <!-- Nombre -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('nombre')">
+              <ion-label position="stacked">
+                Nombre del Producto <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="nombre"
+                type="text"
+                placeholder="Ej: Agua 500ml"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('nombre')">
+                {{ getErrorMessage('nombre') }}
+              </div>
+            </ion-item>
+
+            <!-- Descripción -->
+            <ion-item>
+              <ion-label position="stacked">Descripción</ion-label>
+              <ion-textarea
+                formControlName="descripcion"
+                placeholder="Descripción del producto"
+                [autoGrow]="true"
+                rows="3">
+              </ion-textarea>
+            </ion-item>
+
+            <!-- Categoría -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('categoria')">
+              <ion-label position="stacked">
+                Categoría <span class="required">*</span>
+              </ion-label>
+              <ion-select
+                formControlName="categoria"
+                interface="action-sheet"
+                placeholder="Selecciona una categoría">
+                <ion-select-option value="CERVEZA">Cerveza</ion-select-option>
+                <ion-select-option value="BEBIDA_ALCOHOLICA">Bebida Alcohólica</ion-select-option>
+                <ion-select-option value="GASEOSA">Gaseosa</ion-select-option>
+                <ion-select-option value="AGUA">Agua</ion-select-option>
+                <ion-select-option value="BEBIDA_ENERGIZANTE">Bebida Energizante</ion-select-option>
+                <ion-select-option value="SNACK">Snack</ion-select-option>
+                <ion-select-option value="COMIDA">Comida</ion-select-option>
+                <ion-select-option value="CIGARRILLOS">Cigarrillos</ion-select-option>
+                <ion-select-option value="OTROS">Otros</ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="isFieldInvalid('categoria')">
+                {{ getErrorMessage('categoria') }}
+              </div>
+            </ion-item>
+
+            <!-- Precio -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('precio')">
+              <ion-label position="stacked">
+                Precio de Venta <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="precio"
+                type="number"
+                min="0"
+                placeholder="0">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('precio')">
+                {{ getErrorMessage('precio') }}
+              </div>
+            </ion-item>
+
+            <!-- Costo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('costo')">
+              <ion-label position="stacked">
+                Costo <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="costo"
+                type="number"
+                min="0"
+                placeholder="0">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('costo')">
+                {{ getErrorMessage('costo') }}
+              </div>
+            </ion-item>
+
+            <!-- Margen -->
+            <ion-item lines="none" *ngIf="productoForm.get('precio')?.value && productoForm.get('costo')?.value">
+              <ion-label>
+                <h3>Margen de Ganancia</h3>
+                <p class="margen-info" [class.negativo]="calcularMargen() < 0">
+                  {{ calcularMargen().toFixed(2) }}%
+                  ({{ formatCurrency(productoForm.get('precio')?.value - productoForm.get('costo')?.value) }})
+                </p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Stock -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('stock')">
+              <ion-label position="stacked">
+                Stock Actual <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="stock"
+                type="number"
+                min="0"
+                placeholder="0">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('stock')">
+                {{ getErrorMessage('stock') }}
+              </div>
+            </ion-item>
+
+            <!-- Stock Mínimo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('stockMinimo')">
+              <ion-label position="stacked">
+                Stock Mínimo <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="stockMinimo"
+                type="number"
+                min="1"
+                placeholder="5">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('stockMinimo')">
+                {{ getErrorMessage('stockMinimo') }}
+              </div>
+            </ion-item>
+
+            <!-- Activo -->
+            <ion-item lines="none">
+              <ion-label>
+                <h3>Estado del Producto</h3>
+                <p>{{ productoForm.get('activo')?.value ? 'Activo (visible en POS)' : 'Inactivo (no visible)' }}</p>
+              </ion-label>
+              <ion-select formControlName="activo" interface="popover">
+                <ion-select-option [value]="true">Activo</ion-select-option>
+                <ion-select-option [value]="false">Inactivo</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
+          <!-- Botones de Acción -->
+          <div class="button-container ion-padding">
+            <ion-button
+              expand="block"
+              size="large"
+              (click)="guardar()"
+              [disabled]="loading">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Producto') }}
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              size="large"
+              (click)="cancelar()"
+              [disabled]="loading">
+              Cancelar
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Información adicional -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <h3>💡 Consejos</h3>
+        <ul>
+          <li>El <strong>stock mínimo</strong> te alertará cuando necesites reponer el producto</li>
+          <li>Un buen <strong>margen de ganancia</strong> suele estar entre 30% y 50%</li>
+          <li>Productos <strong>inactivos</strong> no aparecerán en el punto de venta</li>
+          <li>Puedes editar el stock más tarde desde la gestión de inventario</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Toast -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="3000"
+    [color]="toastColor"
+    position="top"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+</ion-content>
