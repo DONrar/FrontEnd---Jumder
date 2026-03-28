@@ -1,35 +1,87 @@
 // src/app/pages/dashboard/dashboard.page.scss
+// Aligned with Jumder Design System
 
+// ==================== DASHBOARD CONTAINER ====================
 .dashboard-container {
   padding: 16px;
   max-width: 1400px;
   margin: 0 auto;
+  background: #f8f9fa;
+  min-height: 100%;
+}
+
+// Force light background on content for dashboard
+:host {
+  ion-content {
+    --background: #f8f9fa;
+  }
+}
+
+// ==================== TOOLBARS ====================
+.dashboard-toolbar {
+  --background: var(--ds-navy, #132440);
+  --color: #ffffff;
+
+  ion-title {
+    ion-icon {
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  }
+}
+
+.segment-toolbar {
+  --background: rgba(19, 36, 64, 0.95);
+
+  ion-segment {
+    --background: rgba(255, 255, 255, 0.08);
+
+    ion-segment-button {
+      --color: rgba(255, 255, 255, 0.7);
+      --color-checked: #ffffff;
+      --indicator-color: var(--ds-teal, #3B9797);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+  }
 }
 
 // ==================== KPI CARDS ====================
 .kpi-card {
   margin: 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 20px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: var(--ds-transition, all 0.3s ease);
+  border: none;
 
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  // Torneos Activos — Navy → Teal gradient
   &.primary {
-    background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    background: linear-gradient(135deg, #16476A 0%, #3B9797 100%);
     color: white;
   }
 
+  // Ingresos Ventas — Teal → light teal gradient
   &.success {
-    background: linear-gradient(135deg, var(--ion-color-success) 0%, var(--ion-color-success-shade) 100%);
+    background: linear-gradient(135deg, #3B9797 0%, #4db8b8 100%);
     color: white;
   }
 
+  // Total Ventas — Crimson → pink gradient
   &.warning {
-    background: linear-gradient(135deg, var(--ion-color-warning) 0%, var(--ion-color-warning-shade) 100%);
+    background: linear-gradient(135deg, #BF092F 0%, #e84466 100%);
     color: white;
   }
 
+  // Jugadores — Navy dark gradient
   &.tertiary {
-    background: linear-gradient(135deg, var(--ion-color-tertiary) 0%, var(--ion-color-tertiary-shade) 100%);
+    background: linear-gradient(135deg, #132440 0%, #1c3a5e 100%);
     color: white;
+    border: 1px solid rgba(59, 151, 151, 0.3);
   }
 
   ion-card-content {
@@ -40,9 +92,18 @@
   }
 
   .kpi-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
     ion-icon {
-      font-size: 48px;
-      opacity: 0.9;
+      font-size: 28px;
+      color: white;
     }
   }
 
@@ -50,12 +111,13 @@
     flex: 1;
 
     h3 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       margin: 0 0 8px 0;
-      opacity: 0.9;
+      opacity: 0.85;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .kpi-value {
@@ -63,23 +125,52 @@
       font-weight: 900;
       margin: 0;
       line-height: 1;
+      color: white;
     }
   }
 }
 
-// ==================== SUMMARY ITEMS ====================
+// ==================== SUMMARY / RESUMEN RÁPIDO ====================
+ion-card:not(.kpi-card):not(.stat-card) {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    ion-card-title {
+      color: #132440;
+      font-size: 18px;
+      font-weight: 700;
+    }
+  }
+
+  ion-card-content {
+    color: #666;
+  }
+}
+
 .summary-item {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: var(--ion-color-light);
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   margin-bottom: 12px;
+  border-left: 4px solid var(--ds-teal, #3B9797);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: var(--ds-transition, all 0.3s ease);
+
+  &:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+  }
 
   ion-icon {
     font-size: 32px;
     flex-shrink: 0;
+    color: var(--ds-teal, #3B9797);
   }
 
   div {
@@ -89,17 +180,18 @@
       font-size: 16px;
       font-weight: 700;
       margin: 0 0 4px 0;
+      color: #132440;
     }
 
     p {
       font-size: 14px;
-      color: var(--ion-color-medium);
+      color: #666;
       margin: 0;
     }
   }
 }
 
-// ==================== GRÁFICOS ====================
+// ==================== CHARTS ====================
 .chart-container {
   padding: 8px 0;
 }
@@ -118,6 +210,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #132440;
 
     .rank {
       display: inline-flex;
@@ -125,7 +218,7 @@
       justify-content: center;
       width: 24px;
       height: 24px;
-      background: var(--ion-color-primary);
+      background: var(--ds-blue, #16476A);
       color: white;
       border-radius: 50%;
       font-size: 12px;
@@ -135,7 +228,7 @@
 
   .bar-container {
     height: 32px;
-    background: var(--ion-color-light);
+    background: rgba(0, 0, 0, 0.05);
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 6px;
@@ -143,7 +236,7 @@
 
     .bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+      background: linear-gradient(90deg, var(--ds-blue, #16476A) 0%, var(--ds-teal, #3B9797) 100%);
       border-radius: 16px;
       transition: width 0.5s ease;
       display: flex;
@@ -153,30 +246,38 @@
       min-width: 40px;
 
       &.success {
-        background: linear-gradient(90deg, var(--ion-color-success) 0%, var(--ion-color-success-shade) 100%);
+        background: linear-gradient(90deg, #3B9797 0%, #4db8b8 100%);
       }
     }
   }
 
   .bar-value {
     font-size: 13px;
-    color: var(--ion-color-medium);
+    color: #666;
     text-align: right;
   }
 }
 
-// ==================== STAT BOX ====================
+// ==================== STAT BOX (Torneo detail) ====================
 .stat-box {
   text-align: center;
   padding: 20px;
-  background: var(--ion-color-light);
-  border-radius: 12px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: var(--ds-transition, all 0.3s ease);
+
+  &:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
 
   h3 {
     font-size: 16px;
     font-weight: 700;
     margin: 0 0 16px 0;
-    color: var(--ion-color-primary);
+    color: var(--ds-teal, #3B9797);
   }
 
   .progress-circle {
@@ -185,27 +286,35 @@
     .value {
       font-size: 36px;
       font-weight: 900;
-      color: var(--ion-color-primary);
+      color: #132440;
     }
 
     .total {
       font-size: 20px;
-      color: var(--ion-color-medium);
+      color: #666;
     }
   }
 
   p {
     font-size: 13px;
-    color: var(--ion-color-medium);
+    color: #666;
     margin: 0;
   }
 }
 
-// ==================== STAT CARD ====================
+// ==================== STAT CARD (Ventas section) ====================
 .stat-card {
   margin: 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 20px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: white;
+  border: none;
+  transition: var(--ds-transition, all 0.3s ease);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
 
   ion-card-content {
     padding: 20px;
@@ -214,7 +323,7 @@
   h3 {
     font-size: 14px;
     font-weight: 600;
-    color: var(--ion-color-medium);
+    color: #666;
     margin: 0 0 12px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -224,10 +333,10 @@
     font-size: 36px;
     font-weight: 900;
     margin: 0 0 12px 0;
-    color: var(--ion-color-dark);
+    color: #132440;
 
     &.primary {
-      color: var(--ion-color-primary);
+      color: var(--ds-teal, #3B9797);
     }
   }
 
@@ -236,17 +345,68 @@
     flex-direction: column;
     gap: 6px;
     font-size: 13px;
+    color: #666;
 
     span {
       &.success {
-        color: var(--ion-color-success);
+        color: var(--ds-teal, #3B9797);
       }
 
       &.warning {
-        color: var(--ion-color-warning);
+        color: var(--ds-crimson, #BF092F);
       }
     }
   }
+}
+
+// ==================== ION-LIST / ION-ITEMS inside cards ====================
+ion-card {
+  ion-list {
+    background: transparent;
+
+    ion-item {
+      --background: transparent;
+      --color: #333;
+      --border-color: rgba(0, 0, 0, 0.05);
+
+      ion-label {
+        h3, h2 {
+          color: #132440 !important;
+        }
+        p {
+          color: #666 !important;
+        }
+      }
+
+      ion-icon {
+        color: var(--ds-teal, #3B9797);
+      }
+    }
+  }
+
+  // Select items
+  ion-item {
+    --background: transparent;
+    --color: #333;
+    --border-color: rgba(0, 0, 0, 0.05);
+
+    ion-label {
+      color: #666 !important;
+    }
+
+    ion-select {
+      color: #132440;
+    }
+
+    ion-input {
+      color: #132440 !important;
+    }
+  }
+}
+
+// Ion chip inside cards
+ion-chip {
+  border-radius: 20px;
 }
 
 // ==================== RESPONSIVE ====================
@@ -261,8 +421,12 @@
     }
 
     .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+
       ion-icon {
-        font-size: 36px;
+        font-size: 22px;
       }
     }
 
@@ -302,31 +466,6 @@
 
     .bar-container {
       height: 40px;
-    }
-  }
-}
-
-// ==================== DARK MODE ====================
-@media (prefers-color-scheme: dark) {
-  .kpi-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .summary-item {
-    background: var(--ion-color-step-100);
-  }
-
-  .stat-box {
-    background: var(--ion-color-step-100);
-  }
-
-  .stat-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .chart-bar {
-    .bar-container {
-      background: var(--ion-color-step-100);
     }
   }
 }

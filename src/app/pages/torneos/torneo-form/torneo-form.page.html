@@ -1,0 +1,256 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <!-- Botón de menú hamburguesa para móvil -->
+    <ion-buttons slot="start">
+      <ion-menu-button menu="main-menu"></ion-menu-button>
+      <ion-back-button defaultHref="/torneos" text="Torneos"></ion-back-button>
+    </ion-buttons>
+
+    <ion-title>
+      <ion-icon name="trophy"></ion-icon>
+      &nbsp;{{ isEditMode ? 'Editar Torneo' : 'Nuevo Torneo' }}
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="trophy"></ion-icon>
+          &nbsp;Información del Torneo
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="torneoForm">
+          <ion-list class="form-list">
+            <!-- Polideportivo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('polideportivoId')">
+              <ion-label position="stacked">
+                <ion-icon name="business" slot="start"></ion-icon>
+                Polideportivo <span class="required">*</span>
+              </ion-label>
+              <ion-select
+                formControlName="polideportivoId"
+                interface="action-sheet"
+                placeholder="Selecciona el polideportivo">
+                <ion-select-option *ngFor="let poli of polideportivos" [value]="poli.id">
+                  {{ poli.nombre }} - {{ poli.ciudad }}
+                </ion-select-option>
+              </ion-select>
+              <div class="error-message" *ngIf="isFieldInvalid('polideportivoId')">
+                {{ getErrorMessage('polideportivoId') }}
+              </div>
+            </ion-item>
+
+            <!-- Nombre -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('nombre')">
+              <ion-label position="stacked">
+                <ion-icon name="pricetag" slot="start"></ion-icon>
+                Nombre del Torneo <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="nombre"
+                type="text"
+                placeholder="Ej: Copa de Verano 2025"
+                clearInput>
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('nombre')">
+                {{ getErrorMessage('nombre') }}
+              </div>
+            </ion-item>
+
+            <!-- Descripción -->
+            <ion-item>
+              <ion-label position="stacked">
+                <ion-icon name="document-text" slot="start"></ion-icon>
+                Descripción
+              </ion-label>
+              <ion-textarea
+                formControlName="descripcion"
+                rows="3"
+                placeholder="Descripción opcional del torneo"
+                [autoGrow]="true">
+              </ion-textarea>
+            </ion-item>
+
+            <!-- Tipo de Torneo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('tipo')">
+              <ion-label position="stacked">
+                <ion-icon name="grid" slot="start"></ion-icon>
+                Tipo de Torneo <span class="required">*</span>
+              </ion-label>
+              <ion-select
+                formControlName="tipo"
+                interface="action-sheet"
+                placeholder="Selecciona el tipo">
+                <ion-select-option *ngFor="let tipo of tiposTorneo" [value]="tipo.value">
+                  {{ tipo.label }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <!-- Estado -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('estado')">
+              <ion-label position="stacked">
+                <ion-icon name="flag" slot="start"></ion-icon>
+                Estado <span class="required">*</span>
+              </ion-label>
+              <ion-select
+                formControlName="estado"
+                interface="action-sheet"
+                placeholder="Selecciona el estado">
+                <ion-select-option *ngFor="let estado of estadosTorneo" [value]="estado.value">
+                  {{ estado.label }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <!-- Fecha Inicio -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('fechaInicio')">
+              <ion-label position="stacked">
+                <ion-icon name="calendar" slot="start"></ion-icon>
+                Fecha de Inicio <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="fechaInicio"
+                type="date"
+                placeholder="Selecciona la fecha">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('fechaInicio')">
+                {{ getErrorMessage('fechaInicio') }}
+              </div>
+            </ion-item>
+
+            <!-- Fecha Fin -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('fechaFin')">
+              <ion-label position="stacked">
+                <ion-icon name="calendar" slot="start"></ion-icon>
+                Fecha de Fin <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="fechaFin"
+                type="date"
+                placeholder="Selecciona la fecha">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('fechaFin')">
+                {{ getErrorMessage('fechaFin') }}
+              </div>
+            </ion-item>
+
+            <!-- Número de Equipos -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('numeroEquipos')">
+              <ion-label position="stacked">
+                <ion-icon name="people" slot="start"></ion-icon>
+                Número de Equipos <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="numeroEquipos"
+                type="number"
+                min="2"
+                max="64"
+                placeholder="Ej: 8">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('numeroEquipos')">
+                {{ getErrorMessage('numeroEquipos') }}
+              </div>
+            </ion-item>
+
+            <!-- Jugadores por Equipo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('jugadoresPorEquipo')">
+              <ion-label position="stacked">
+                <ion-icon name="person" slot="start"></ion-icon>
+                Jugadores por Equipo <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="jugadoresPorEquipo"
+                type="number"
+                min="5"
+                max="15"
+                placeholder="Ej: 11">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('jugadoresPorEquipo')">
+                {{ getErrorMessage('jugadoresPorEquipo') }}
+              </div>
+            </ion-item>
+
+            <!-- Valor Carnet -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('valorCarnet')">
+              <ion-label position="stacked">
+                <ion-icon name="cash" slot="start"></ion-icon>
+                Valor Carnet (COP) <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="valorCarnet"
+                type="number"
+                min="0"
+                placeholder="Ej: 50000">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('valorCarnet')">
+                {{ getErrorMessage('valorCarnet') }}
+              </div>
+            </ion-item>
+
+            <!-- Valor Inscripción Equipo -->
+            <ion-item [class.ion-invalid]="isFieldInvalid('valorInscripcionEquipo')">
+              <ion-label position="stacked">
+                <ion-icon name="cash" slot="start"></ion-icon>
+                Valor Inscripción Equipo (COP) <span class="required">*</span>
+              </ion-label>
+              <ion-input
+                formControlName="valorInscripcionEquipo"
+                type="number"
+                min="0"
+                placeholder="Ej: 300000">
+              </ion-input>
+              <div class="error-message" *ngIf="isFieldInvalid('valorInscripcionEquipo')">
+                {{ getErrorMessage('valorInscripcionEquipo') }}
+              </div>
+            </ion-item>
+          </ion-list>
+
+          <!-- Botones de Acción -->
+          <div class="button-container ion-padding">
+            <ion-button
+              expand="block"
+              size="large"
+              class="btn-accion-gradiente"
+              (click)="guardar()"
+              [disabled]="loading || torneoForm.invalid">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Torneo') }}
+            </ion-button>
+
+            <ion-button
+              expand="block"
+              fill="outline"
+              size="large"
+              (click)="cancelar()"
+              [disabled]="loading">
+              <ion-icon name="close-outline" slot="start"></ion-icon>
+              Cancelar
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Toast -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [duration]="3000"
+    [color]="toastColor"
+    position="top"
+    (didDismiss)="showToast = false">
+  </ion-toast>
+</ion-content>

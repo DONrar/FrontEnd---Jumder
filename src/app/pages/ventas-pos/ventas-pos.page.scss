@@ -1,20 +1,99 @@
-// src/app/pages/ventas/ventas-pos/ventas-pos.page.scss
+// ==================== HEADER & TOOLS ====================
+ion-header {
+  ion-toolbar {
+    --background: #132440;
+    --color: white;
+
+    ion-title {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      ion-icon {
+        font-size: 24px;
+        color: #3B9797;
+      }
+    }
+  }
+
+  ion-toolbar:nth-of-type(2) {
+    --background: #132440;
+    padding: 8px 16px;
+    --min-height: 56px;
+
+    ion-searchbar {
+      --background: rgba(255, 255, 255, 0.1);
+      --color: white;
+      --placeholder-color: rgba(255, 255, 255, 0.6);
+      --border-radius: 12px;
+      --box-shadow: none;
+      margin: 0;
+
+      &::part(container) {
+        border-radius: 12px;
+      }
+
+      &::part(icon) {
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+  }
+
+  ion-toolbar:nth-of-type(3) {
+    --background: #132440;
+    padding: 4px 16px 12px;
+
+    ion-segment {
+      --background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+
+      ion-segment-button {
+        --background: transparent;
+        --color: rgba(255, 255, 255, 0.6);
+        --color-checked: #ffffff;
+        --indicator-color: #3B9797;
+        min-height: 38px;
+        font-weight: 600;
+
+        ion-label {
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
 
 .pos-grid {
   padding: 0;
   margin: 0;
   height: 100%;
+  background: #f8f9fa;
 }
 
 // ==================== PRODUCTOS ====================
 .productos-section {
-  padding: 16px;
+  padding: 24px 16px;
 
   .section-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 16px 0;
-    color: var(--ion-color-primary);
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 20px 0;
+    color: #132440;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: #3B9797;
+      border-radius: 2px;
+    }
   }
 }
 
@@ -146,6 +225,23 @@
     padding: 16px;
     max-height: calc(100vh - 300px);
     overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Hide global scrollbars in content */
+ion-content {
+  &::part(scroll) {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

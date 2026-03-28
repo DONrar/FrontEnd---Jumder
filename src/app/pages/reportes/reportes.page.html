@@ -1,0 +1,133 @@
+<!-- src/app/pages/reportes/reportes.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reportes y Estadísticas</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="segmento" mode="md">
+      <ion-segment-button value="deportivo">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <ion-label>Deportivo</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="economico">
+        <ion-icon name="cash-outline"></ion-icon>
+        <ion-label>Económico</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Generando reporte...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    
+    <!-- REPORTE DEPORTIVO -->
+    <div *ngIf="segmento === 'deportivo'">
+      <ion-item class="selector-item">
+        <ion-label>Torneo:</ion-label>
+        <ion-select [(ngModel)]="torneoSeleccionadoId" (ionChange)="onTorneoChange()" interface="popover">
+          <ion-select-option *ngFor="let t of torneos" [value]="t.id">{{ t.nombre }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <div *ngIf="resumenDeportivo" class="report-content">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-card class="stat-card">
+                <ion-card-content>
+                  <ion-icon name="people-outline" color="primary"></ion-icon>
+                  <div class="stat-value">{{ resumenDeportivo.totalEquipos }}</div>
+                  <div class="stat-label">Equipos</div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="6">
+              <ion-card class="stat-card">
+                <ion-card-content>
+                  <ion-icon name="football-outline" color="success"></ion-icon>
+                  <div class="stat-value">{{ resumenDeportivo.totalGoles }}</div>
+                  <div class="stat-label">Goles</div>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Top Goleadores</ion-card-title>
+          </ion-card-header>
+          <ion-list lines="none">
+            <ion-item *ngFor="let j of resumenDeportivo.goleadores; let i = index">
+              <ion-badge slot="start" [color]="i === 0 ? 'warning' : 'medium'">{{ i + 1 }}</ion-badge>
+              <ion-label>
+                <h3>{{ j.nombreCompleto }}</h3>
+                <p>{{ j.equipoNombre }}</p>
+                <ion-progress-bar [value]="j.goles! / 20" color="primary"></ion-progress-bar>
+              </ion-label>
+              <ion-note slot="end" color="primary">{{ j.goles! }} Goles</ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- REPORTE ECONÓMICO -->
+    <div *ngIf="segmento === 'economico'">
+      <ion-card class="filter-card">
+        <ion-card-content>
+          <ion-row>
+            <ion-col size="6">
+              <ion-label position="stacked">Desde</ion-label>
+              <ion-input type="date" [(ngModel)]="fechaInicio" (ionChange)="onFechasChange()"></ion-input>
+            </ion-col>
+            <ion-col size="6">
+              <ion-label position="stacked">Hasta</ion-label>
+              <ion-input type="date" [(ngModel)]="fechaFin" (ionChange)="onFechasChange()"></ion-input>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+
+      <div *ngIf="resumenVentas" class="report-content">
+        <ion-card class="total-card">
+          <ion-card-content class="ion-text-center">
+            <div class="total-label">Ventas Totales</div>
+            <div class="total-value">{{ resumenVentas.totalVentas | currency:'USD':'symbol':'1.0-0' }}</div>
+            <ion-chip color="success">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              {{ resumenVentas.cantidadVentas }} Operaciones
+            </ion-chip>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Productos más vendidos</ion-card-title>
+          </ion-card-header>
+          <ion-list lines="none">
+            <ion-item *ngFor="let p of resumenVentas.topProductos">
+              <ion-icon name="cart-outline" slot="start" color="medium"></ion-icon>
+              <ion-label>
+                <h3>{{ p.nombre }}</h3>
+                <p>{{ p.categoria }}</p>
+              </ion-label>
+              <ion-note slot="end">x{{ p.cantidadVendida }}</ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

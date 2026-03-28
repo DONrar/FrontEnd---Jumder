@@ -304,18 +304,22 @@ export interface ResumenTorneo {
   totalPartidos: number;
   partidosJugados: number;
   partidosPendientes: number;
+  totalGoles: number;
   ingresosCarnets: number;
   ingresosInscripciones: number;
   totalIngresos: number;
+  goleadores: JugadorDTO[];
 }
 
 export interface ResumenVentas {
   totalVentas: number;
+  cantidadVentas: number;
   ventasCompletadas: number;
   ventasPendientes: number;
   totalIngresos: number;
   ingresosPorMetodoPago: { [key: string]: number };
   productosMasVendidos: { [key: string]: number };
+  topProductos: { nombre: string, categoria?: string, cantidadVendida: number }[];
 }
 
 // ======================== PAGO ========================

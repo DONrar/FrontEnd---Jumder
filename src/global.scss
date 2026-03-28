@@ -1,12 +1,6 @@
 /*
- * App Global CSS
+ * App Global CSS — Jumder Design System
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
 /* Core CSS required for Ionic components to work properly */
@@ -18,52 +12,52 @@
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
+/* Optional CSS utils */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+/* NOTE: Removed dark.system.css import to prevent OS dark mode from
+   overriding our custom design-system palette */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
-/*
- * App Global CSS
- */
+/* ===== GLOBAL DESIGN SYSTEM STYLES ===== */
 
-@import "@ionic/angular/css/core.css";
-@import "@ionic/angular/css/normalize.css";
-@import "@ionic/angular/css/structure.css";
-@import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
+// Global card styling
+ion-card {
+  border-radius: var(--ds-card-radius, 16px) !important;
+  box-shadow: var(--ds-card-shadow, 0 4px 16px rgba(0, 0, 0, 0.08));
+  transition: var(--ds-transition, all 0.3s ease);
+  overflow: hidden;
 
-// Estilos globales personalizados
-ion-menu {
-  ion-item.selected {
-    --background: rgba(var(--ion-color-primary-rgb), 0.14);
-    --color: var(--ion-color-primary);
+  &:hover {
+    transform: var(--ds-hover-transform, translateY(-2px));
+    box-shadow: var(--ds-hover-shadow, 0 8px 24px rgba(0, 0, 0, 0.12));
   }
 }
 
+// Toolbar always navy with white
+ion-toolbar {
+  --background: var(--ds-navy, #132440);
+  --color: #ffffff;
+}
+
+// Menu selected item
+ion-menu {
+  ion-item.selected {
+    --background: rgba(59, 151, 151, 0.14);
+    --color: var(--ds-teal, #3B9797);
+  }
+}
+
+// Empty state
 .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: var(--ion-color-medium);
 
-  ion-icon {
+  & > ion-icon {
     font-size: 80px;
     opacity: 0.5;
     margin-bottom: 20px;
@@ -80,7 +74,7 @@ ion-menu {
   }
 }
 
-// Ajustes para tablets y desktop
+// Tablets and desktop
 @media (min-width: 768px) {
   ion-content {
     --padding-start: 16px;

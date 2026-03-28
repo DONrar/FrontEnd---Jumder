@@ -7,8 +7,8 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton,
   IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonList,
   IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonBadge,
-  IonSearchbar, IonGrid, IonRow, IonCol, IonChip, IonFab, IonFabButton,
-  IonModal, IonToast, IonAlert, IonSegment, IonSegmentButton, IonSkeletonText
+  IonSearchbar, IonGrid, IonRow, IonCol, IonChip,
+  IonModal, IonToast, IonSegment, IonSegmentButton, IonMenuButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -19,7 +19,9 @@ import {
 import { VentaService } from '../..//services/venta-service';
 import { ProductoService } from '../../services/producto-service';
 import { StorageService } from '../../services/storage-service';
-import { VentaDTO, DetalleVentaDTO, Producto } from '../../models/torneo.model';
+import { TorneoService } from '../../services/torneo-service';
+import { PartidoService } from '../../services/partido-service';
+import { VentaDTO, DetalleVentaDTO, Producto, PartidoDTO, TorneoDTO } from '../../models/torneo.model';
 
 interface ProductoCarrito extends Producto {
   cantidadCarrito: number;
@@ -36,19 +38,21 @@ interface ProductoCarrito extends Producto {
     IonButtons, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle,
     IonCardContent, IonList, IonItem, IonLabel, IonInput, IonSelect,
     IonSelectOption, IonBadge, IonSearchbar, IonGrid, IonRow, IonCol,
-    IonChip, IonFab, IonFabButton, IonModal, IonToast, IonAlert,
-    IonSegment, IonSegmentButton, IonSkeletonText
+    IonChip, IonModal, IonToast, IonSegment, IonSegmentButton, IonMenuButton
   ]
 })
 export class VentasPosPage implements OnInit {
   private ventaService = inject(VentaService);
   private productoService = inject(ProductoService);
   private storageService = inject(StorageService);
+  private torneoService = inject(TorneoService);
+  private partidoService = inject(PartidoService);
   private router = inject(Router);
 
   productosDisponibles: Producto[] = [];
   productosFiltrados: Producto[] = [];
   carrito: ProductoCarrito[] = [];
+  partidosDisponibles: PartidoDTO[] = [];
 
   searchText = '';
   categoriaFilter = 'TODOS';
@@ -88,9 +92,37 @@ export class VentasPosPage implements OnInit {
     this.polideportivoId = this.storageService.getPolideportivoId() || undefined;
     if (this.polideportivoId) {
       this.cargarProductos();
+      this.cargarPartidos();
     } else {
       this.router.navigate(['/polideportivos/selector']);
     }
+  }
+
+  cargarPartidos() {
+    if (!this.polideportivoId) return;
+
+    // 1. Obtener torneos activos del polideportivo
+    this.torneoService.listarTorneosPorPolideportivo(this.polideportivoId).subscribe({
+      next: (torneos) => {
+        const torneosActivos = torneos.filter(t => t.estado === 'ACTIVO' || t.estado === 'PENDIENTE');
+        
+        // 2. Por cada torneo, obtener sus partidos
+        this.partidosDisponibles = [];
+        const hoy = new Date().toISOString().split('T')[0];
+
+        torneosActivos.forEach(torneo => {
+          this.partidoService.listarPartidosPorTorneo(torneo.id!).subscribe({
+            next: (partidos: PartidoDTO[]) => {
+              // Filtrar partidos: hoy o "EN_CURSO"
+              const partidosRelevantes = partidos.filter((p: PartidoDTO) => 
+                (p.fechaHora && p.fechaHora.startsWith(hoy)) || p.estado === 'EN_CURSO'
+              );
+              this.partidosDisponibles = [...this.partidosDisponibles, ...partidosRelevantes];
+            }
+          });
+        });
+      }
+    });
   }
 
   cargarProductos() {

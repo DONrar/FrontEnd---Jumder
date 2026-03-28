@@ -1,0 +1,242 @@
+<!-- src/app/pages/equipos/equipo-detail/equipo-detail.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/equipos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ equipo?.nombre || 'Detalle Equipo' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editarEquipo()" *ngIf="equipo">
+        <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="cargarDatos()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="segmentValue" (ionChange)="onSegmentChange($event)" mode="md">
+      <ion-segment-button value="resumen">
+        <ion-label>Resumen</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="jugadores">
+        <ion-label>Jugadores</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="partidos">
+        <ion-label>Partidos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-padding">
+    <ion-skeleton-text [animated]="true" style="width: 100%; height: 200px"></ion-skeleton-text>
+    <ion-skeleton-text [animated]="true" style="width: 100%; height: 100px; margin-top: 15px;"></ion-skeleton-text>
+  </div>
+
+  <div *ngIf="!loading && equipo" class="detail-container">
+
+    <!-- HEADER / PROFILE -->
+    <div class="profile-header">
+      <div class="avatar-container">
+        <ion-avatar class="main-avatar">
+          <img [src]="equipo.logo || 'assets/img/team-placeholder.png'" 
+               (error)="equipo.logo = 'assets/img/team-placeholder.png'"
+               [alt]="equipo.nombre">
+        </ion-avatar>
+        <div class="status-badge" [class.paid]="equipo.inscripcionPagada" [class.pending]="!equipo.inscripcionPagada">
+          <ion-icon [name]="equipo.inscripcionPagada ? 'checkmark-circle' : 'time'"></ion-icon>
+          {{ equipo.inscripcionPagada ? 'Pagado' : 'Pendiente' }}
+        </div>
+      </div>
+      <h1 class="team-name">{{ equipo.nombre }}</h1>
+      <p class="team-subtitle">
+        <ion-icon name="trophy-outline"></ion-icon> {{ equipo.torneoNombre || 'Torneo no asignado' }}
+        <span *ngIf="equipo.grupoNombre" class="grupo-badge">• {{ equipo.grupoNombre }}</span>
+      </p>
+      
+      <p class="captain-info" *ngIf="equipo.capitanNombre">
+        <ion-icon name="star"></ion-icon> Capitán: {{ equipo.capitanNombre }}
+      </p>
+    </div>
+
+    <!-- ==================== RESUMEN ==================== -->
+    <div *ngIf="segmentValue === 'resumen'" class="tab-content">
+      
+      <!-- DESCRIPCIÓN -->
+      <ion-card *ngIf="equipo.descripcion">
+        <ion-card-header>
+          <ion-card-title><ion-icon name="information-circle-outline"></ion-icon> Descripción</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>{{ equipo.descripcion }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- ESTADÍSTICAS -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title><ion-icon name="stats-chart-outline"></ion-icon> Rendimiento</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="stats-grid">
+            <div class="stat-box primary">
+              <div class="stat-value">{{ equipo.puntos || 0 }}</div>
+              <div class="stat-label">Puntos</div>
+            </div>
+            <div class="stat-box secondary">
+              <div class="stat-value">{{ equipo.partidosJugados || 0 }}</div>
+              <div class="stat-label">PJ</div>
+            </div>
+            <div class="stat-box success">
+              <div class="stat-value">{{ equipo.partidosGanados || 0 }}</div>
+              <div class="stat-label">PG</div>
+            </div>
+            <div class="stat-box warning">
+              <div class="stat-value">{{ equipo.partidosEmpatados || 0 }}</div>
+              <div class="stat-label">PE</div>
+            </div>
+            <div class="stat-box danger">
+              <div class="stat-value">{{ equipo.partidosPerdidos || 0 }}</div>
+              <div class="stat-label">PP</div>
+            </div>
+            <div class="stat-box info">
+              <div class="stat-value">{{ equipo.diferenciaGoles || 0 }}</div>
+              <div class="stat-label">DG ({{ equipo.golesAFavor || 0 }}:{{ equipo.golesEnContra || 0 }})</div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+    <!-- ==================== JUGADORES ==================== -->
+    <div *ngIf="segmentValue === 'jugadores'" class="tab-content">
+      <ion-card>
+        <ion-card-header>
+          <div class="header-with-title">
+            <ion-card-title>Plantilla ({{ jugadores.length }})</ion-card-title>
+          </div>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list class="jugadores-list">
+            <ion-item *ngFor="let jugador of jugadores" button (click)="verJugador(jugador)" detail="false" class="jugador-item">
+              <ion-avatar slot="start">
+                <img [src]="jugador.foto || 'assets/img/avatar-placeholder.png'" 
+                     (error)="jugador.foto = 'assets/img/avatar-placeholder.png'">
+              </ion-avatar>
+              
+              <div class="jugador-info">
+                <h2>
+                  {{ jugador.nombreCompleto }}
+                  <ion-icon *ngIf="equipo.capitanId === jugador.id" name="star" color="warning" class="capitan-icon"></ion-icon>
+                </h2>
+                <p class="posicion-badge">{{ getPosicionLabel(jugador.posicion || '') }}</p>
+                <p class="dorsal" *ngIf="jugador.numeroCamiseta">#{{ jugador.numeroCamiseta }}</p>
+              </div>
+
+              <!-- Mini stats -->
+              <div class="mini-stats" slot="end" *ngIf="jugador.goles || jugador.tarjetasAmarillas || jugador.tarjetasRojas">
+                <span class="stat-chip success" *ngIf="jugador.goles">⚽ {{ jugador.goles }}</span>
+                <span class="stat-chip warning" *ngIf="jugador.tarjetasAmarillas">🟨 {{ jugador.tarjetasAmarillas }}</span>
+                <span class="stat-chip danger" *ngIf="jugador.tarjetasRojas">🟥 {{ jugador.tarjetasRojas }}</span>
+              </div>
+            </ion-item>
+
+            <div *ngIf="jugadores.length === 0" class="empty-state">
+              <ion-icon name="people-outline"></ion-icon>
+              <p>No hay jugadores registrados en este equipo</p>
+            </div>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- ==================== PARTIDOS ==================== -->
+    <div *ngIf="segmentValue === 'partidos'" class="tab-content">
+      
+      <!-- Próximos -->
+      <ion-card *ngIf="proximosPartidos.length > 0">
+        <ion-card-header>
+          <ion-card-title><ion-icon name="calendar-outline"></ion-icon> Próximos Encuentros</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngFor="let partido of proximosPartidos" button (click)="verPartido(partido)" class="partido-item">
+              <div class="partido-info">
+                <div class="partido-meta">
+                  <span class="fecha">{{ formatDate(partido.fechaHora) }}</span>
+                  <ion-chip [color]="getEstadoPartidoColor(partido.estado)" size="small">
+                    {{ getEstadoPartidoLabel(partido.estado) }}
+                  </ion-chip>
+                </div>
+                
+                <div class="versus-container">
+                  <div class="equipo-lado" [class.is-this-team]="partido.equipoLocalId === equipo.id">
+                    <span class="nombre">{{ partido.equipoLocalNombre }}</span>
+                  </div>
+                  <div class="vs-badge">VS</div>
+                  <div class="equipo-lado" [class.is-this-team]="partido.equipoVisitanteId === equipo.id">
+                    <span class="nombre">{{ partido.equipoVisitanteNombre }}</span>
+                  </div>
+                </div>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Resultados -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title><ion-icon name="time-outline"></ion-icon> Resultados Anteriores</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item *ngFor="let partido of ultimosResultados" button (click)="verPartido(partido)" class="partido-item">
+              <div class="partido-info">
+                <div class="partido-meta">
+                  <span class="fecha">{{ formatDate(partido.fechaHora) }}</span>
+                  <ion-chip *ngIf="partido.fase" color="medium" size="small">{{ partido.fase }}</ion-chip>
+                </div>
+                
+                <div class="versus-container">
+                  <div class="equipo-lado" [class.is-this-team]="partido.equipoLocalId === equipo.id">
+                    <span class="nombre">{{ partido.equipoLocalNombre }}</span>
+                  </div>
+                  
+                  <div class="marcador-badge" [ngClass]="{
+                    'win': partido.ganadorId === equipo.id,
+                    'loss': partido.ganadorId && partido.ganadorId !== equipo.id,
+                    'draw': !partido.ganadorId
+                  }">
+                    {{ partido.golesLocal != null ? partido.golesLocal : '-' }} 
+                    - 
+                    {{ partido.golesVisitante != null ? partido.golesVisitante : '-' }}
+                  </div>
+                  
+                  <div class="equipo-lado" [class.is-this-team]="partido.equipoVisitanteId === equipo.id">
+                    <span class="nombre">{{ partido.equipoVisitanteNombre }}</span>
+                  </div>
+                </div>
+              </div>
+            </ion-item>
+          </ion-list>
+
+          <div *ngIf="ultimosResultados.length === 0" class="empty-state">
+            <ion-icon name="football-outline"></ion-icon>
+            <p>No hay partidos finalizados</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+  </div>
+</ion-content>

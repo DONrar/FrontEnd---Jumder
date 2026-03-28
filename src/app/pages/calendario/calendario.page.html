@@ -1,0 +1,124 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button menu="main-menu"></ion-menu-button>
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Calendario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="handleRefresh($event)">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="calendar-container">
+    
+    <!-- Header del Calendario -->
+    <div class="calendar-header">
+      <div class="header-info">
+        <h1>{{ nombresMeses[mesActual] }}</h1>
+        <p>{{ anioActual }}</p>
+      </div>
+      <div class="header-actions">
+        <ion-button fill="clear" (click)="mesAnterior()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" (click)="mesSiguiente()">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Grid del Calendario -->
+    <div class="calendar-grid">
+      <div class="day-name">Lun</div>
+      <div class="day-name">Mar</div>
+      <div class="day-name">Mié</div>
+      <div class="day-name">Jue</div>
+      <div class="day-name">Vie</div>
+      <div class="day-name">Sáb</div>
+      <div class="day-name">Dom</div>
+
+      <div *ngFor="let d of diasMes" 
+           class="calendar-day" 
+           [class.out]="d.out"
+           [class.today]="d.hoy"
+           [class.selected]="d.seleccionado"
+           [class.has-events]="d.tienePartidos"
+           (click)="seleccionarDia(d)">
+        <span>{{ d.dia }}</span>
+        <div *ngIf="d.tienePartidos" class="event-dot"></div>
+      </div>
+    </div>
+
+    <!-- Lista de Partidos del Día -->
+    <div class="events-section">
+      <div class="section-header">
+        <h2>{{ fechaSeleccionada | date:'fullDate':'':'es-CO' }}</h2>
+        <ion-badge color="primary" *ngIf="partidosDelDia.length > 0">
+          {{ partidosDelDia.length }} {{ partidosDelDia.length === 1 ? 'Partido' : 'Partidos' }}
+        </ion-badge>
+      </div>
+
+      <div *ngIf="loading" class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando partidos...</p>
+      </div>
+
+      <div *ngIf="!loading && partidosDelDia.length === 0" class="empty-state">
+        <div class="empty-icon shadow-premium">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <h3>No hay partidos</h3>
+        <p>No se encontraron encuentros programados para esta fecha.</p>
+      </div>
+
+      <ion-list lines="none" *ngIf="!loading && partidosDelDia.length > 0" class="matches-list">
+        <ion-card *ngFor="let partido of partidosDelDia" (click)="verPartido(partido)" class="match-card premium-card">
+          <ion-card-content>
+            <div class="match-header">
+              <span class="fase">{{ partido.fase }}</span>
+              <ion-badge [color]="getEstadoColor(partido.estado)">{{ partido.estado }}</ion-badge>
+            </div>
+            
+            <div class="match-teams">
+              <div class="team local">
+                <div class="team-logo">
+                  <ion-icon name="shield-outline"></ion-icon>
+                </div>
+                <span class="team-name">{{ partido.equipoLocalNombre }}</span>
+              </div>
+              
+              <div class="match-score" *ngIf="partido.estado === 'FINALIZADO' || partido.estado === 'EN_CURSO'">
+                <span class="score">{{ partido.golesLocal }}</span>
+                <span class="vs">-</span>
+                <span class="score">{{ partido.golesVisitante }}</span>
+              </div>
+              <div class="match-time" *ngIf="partido.estado === 'PROGRAMADO'">
+                <span class="vs">VS</span>
+                <span class="time">{{ formatHora(partido.fechaHora) }}</span>
+              </div>
+
+              <div class="team visitante">
+                <div class="team-logo">
+                  <ion-icon name="shield-outline"></ion-icon>
+                </div>
+                <span class="team-name">{{ partido.equipoVisitanteNombre }}</span>
+              </div>
+            </div>
+
+            <div class="match-footer">
+              <div class="match-info">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ partido.canchaNombre || 'Cancha por definir' }}</span>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

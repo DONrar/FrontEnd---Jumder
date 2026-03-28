@@ -1,15 +1,14 @@
 <!-- src/app/app.component.html -->
 <ion-app>
   <ion-split-pane contentId="main-content">
-    <!-- MENÚ LATERAL MEJORADO -->
     <ion-menu contentId="main-content" type="overlay" menuId="main-menu" class="premium-menu">
+
       <ion-header class="menu-header">
         <ion-toolbar class="menu-toolbar">
-          <!-- Logo y Nombre del Polideportivo -->
           <div class="polideportivo-info">
             <div class="logo-container">
               <div class="app-logo">
-                <ion-icon name="trophy"></ion-icon>
+                <ion-icon name="trophy" class="logo-icon"></ion-icon>
               </div>
             </div>
             <div class="polideportivo-details">
@@ -19,24 +18,23 @@
                   <ion-icon name="checkmark-circle"></ion-icon>
                   <ion-label>Conectado</ion-label>
                 </ion-chip>
-                <ion-button
-                  fill="clear"
-                  size="small"
-                  class="change-btn"
-                  (click)="cambiarPolideportivo()">
-                  <ion-icon name="swap-horizontal" slot="start"></ion-icon>
-                  Cambiar
-                </ion-button>
               </div>
             </div>
           </div>
+          <ion-buttons slot="end">
+            <ion-menu-toggle auto-hide="false">
+              <ion-button fill="clear" class="close-menu-btn">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-menu-toggle>
+          </ion-buttons>
         </ion-toolbar>
       </ion-header>
 
-      <ion-content class="menu-content" scroll-y="false">
-        <!-- Sección principal de navegación -->
-        <div class="menu-sections">
-          <!-- Dashboard -->
+      <ion-content class="menu-content">
+        <div class="menu-scroll-wrapper">
+
+          <!-- Sección: Dashboard -->
           <div class="menu-section">
             <h3 class="section-title">
               <ion-icon name="speedometer"></ion-icon>
@@ -49,23 +47,20 @@
                   routerLink="/dashboard"
                   lines="none"
                   detail="false"
-                  routerLinkActive="selected"
+                  [class.selected]="isItemActive({title: 'Dashboard', url: '/dashboard', icon: icons.statsChart, color: 'primary'})"
                   class="menu-item">
                   <div class="menu-item-content">
                     <div class="item-icon-container primary">
-                      <ion-icon name="stats-chart"></ion-icon>
+                      <ion-icon [icon]="icons.statsChart"></ion-icon>
                     </div>
                     <ion-label>Panel Principal</ion-label>
-                  </div>
-                  <div class="item-badge" slot="end">
-                    <ion-badge color="primary" *ngIf="estadisticas?.totalTorneos">N</ion-badge>
                   </div>
                 </ion-item>
               </ion-menu-toggle>
             </ion-list>
           </div>
 
-          <!-- Gestión Deportiva -->
+          <!-- Sección: Gestión Deportiva -->
           <div class="menu-section">
             <h3 class="section-title">
               <ion-icon name="trophy"></ion-icon>
@@ -74,31 +69,57 @@
             <ion-list lines="none" class="menu-list">
               @for (item of deportesPages; track item.title) {
                 <ion-menu-toggle auto-hide="false">
-                  <ion-item
-                    [routerDirection]="'root'"
-                    [routerLink]="[item.url]"
-                    lines="none"
-                    detail="false"
-                    routerLinkActive="selected"
-                    class="menu-item">
-                    <div class="menu-item-content">
-                      <div class="item-icon-container" [class]="item.color">
-                        <ion-icon [name]="item.icon"></ion-icon>
+
+                  <!-- ✅ NUEVO: si el item tiene acción custom (ej. Partidos), usar button con (click) -->
+                  @if (item.action) {
+                    <ion-item
+                      lines="none"
+                      detail="false"
+                      button
+                      class="menu-item"
+                      [class.selected]="isItemActive(item)"
+                      (click)="onMenuItemClick(item)">
+                      <div class="menu-item-content">
+                        <div class="item-icon-container" [class]="item.color">
+                          <ion-icon [icon]="item.icon"></ion-icon>
+                        </div>
+                        <ion-label>{{ item.title }}</ion-label>
                       </div>
-                      <ion-label>{{ item.title }}</ion-label>
-                    </div>
-                    <div class="item-badge" slot="end">
-                      @if (item.badge && item.badge > 0) {
-                        <ion-badge [color]="item.badgeColor">{{ item.badge > 99 ? '99+' : item.badge }}</ion-badge>
-                      }
-                    </div>
-                  </ion-item>
+                      <div class="item-badge" slot="end">
+                        @if (item.badge && item.badge > 0) {
+                          <ion-badge [color]="item.badgeColor">{{ item.badge > 99 ? '99+' : item.badge }}</ion-badge>
+                        }
+                      </div>
+                    </ion-item>
+                  } @else {
+                    <!-- items normales con routerLink -->
+                    <ion-item
+                      [routerDirection]="'root'"
+                      [routerLink]="[item.url]"
+                      lines="none"
+                      detail="false"
+                      [class.selected]="isItemActive(item)"
+                      class="menu-item">
+                      <div class="menu-item-content">
+                        <div class="item-icon-container" [class]="item.color">
+                          <ion-icon [icon]="item.icon"></ion-icon>
+                        </div>
+                        <ion-label>{{ item.title }}</ion-label>
+                      </div>
+                      <div class="item-badge" slot="end">
+                        @if (item.badge && item.badge > 0) {
+                          <ion-badge [color]="item.badgeColor">{{ item.badge > 99 ? '99+' : item.badge }}</ion-badge>
+                        }
+                      </div>
+                    </ion-item>
+                  }
+
                 </ion-menu-toggle>
               }
             </ion-list>
           </div>
 
-          <!-- Punto de Venta -->
+          <!-- Sección: Punto de Venta -->
           <div class="menu-section">
             <h3 class="section-title">
               <ion-icon name="cash"></ion-icon>
@@ -112,11 +133,11 @@
                     [routerLink]="[item.url]"
                     lines="none"
                     detail="false"
-                    routerLinkActive="selected"
+                    [class.selected]="isItemActive(item)"
                     class="menu-item">
                     <div class="menu-item-content">
                       <div class="item-icon-container" [class]="item.color">
-                        <ion-icon [name]="item.icon"></ion-icon>
+                        <ion-icon [icon]="item.icon"></ion-icon>
                       </div>
                       <ion-label>{{ item.title }}</ion-label>
                     </div>
@@ -131,7 +152,7 @@
             </ion-list>
           </div>
 
-          <!-- Configuración -->
+          <!-- Sección: Configuración -->
           <div class="menu-section">
             <h3 class="section-title">
               <ion-icon name="settings"></ion-icon>
@@ -144,76 +165,48 @@
                   routerLink="/polideportivos/selector"
                   lines="none"
                   detail="false"
-                  routerLinkActive="selected"
+                  [class.selected]="isItemActive({title: 'Polideportivos', url: '/polideportivos/selector', icon: icons.business, color: 'warning'})"
                   class="menu-item">
                   <div class="menu-item-content">
                     <div class="item-icon-container warning">
-                      <ion-icon name="business"></ion-icon>
+                      <ion-icon [icon]="icons.business"></ion-icon>
                     </div>
                     <ion-label>Polideportivos</ion-label>
                   </div>
                 </ion-item>
               </ion-menu-toggle>
-
-              <ion-menu-toggle auto-hide="false">
-                <ion-item
-                  routerDirection="root"
-                  routerLink="/configuracion"
-                  lines="none"
-                  detail="false"
-                  routerLinkActive="selected"
-                  class="menu-item">
-                  <div class="menu-item-content">
-                    <div class="item-icon-container medium">
-                      <ion-icon name="cog"></ion-icon>
-                    </div>
-                    <ion-label>Configuración</ion-label>
-                  </div>
-                </ion-item>
-              </ion-menu-toggle>
             </ion-list>
           </div>
-        </div>
 
-        <!-- Acción rápida - Cambiar polideportivo flotante -->
-        <div class="floating-action">
-          <ion-button expand="block" fill="solid" color="warning" class="change-polideportivo-btn"
-                     (click)="cambiarPolideportivo()">
-            <ion-icon name="swap-horizontal" slot="start"></ion-icon>
-            Cambiar Polideportivo
-          </ion-button>
-        </div>
-
-        <!-- Footer del menú -->
-        <div class="menu-footer">
-          <div class="user-info">
-            <div class="user-avatar">
-              <ion-icon name="person-circle"></ion-icon>
-            </div>
-            <div class="user-details">
-              <span class="user-name">Administrador</span>
-              <span class="user-role">Super Admin</span>
-            </div>
-          </div>
-
-          <div class="footer-actions">
-            <ion-button fill="clear" size="small" (click)="abrirAyuda()">
-              <ion-icon name="help-circle"></ion-icon>
-            </ion-button>
-            <ion-button fill="clear" size="small" (click)="cerrarSesion()">
-              <ion-icon name="log-out"></ion-icon>
+          <!-- Botón Cambiar Polideportivo -->
+          <div class="change-action">
+            <ion-button expand="block" fill="solid" color="danger" class="change-polideportivo-btn"
+                       (click)="cambiarPolideportivo()">
+              <ion-icon name="swap-horizontal" slot="start"></ion-icon>
+              Cambiar Polideportivo
             </ion-button>
           </div>
 
-          <div class="app-info">
-            <span class="app-version">Gestión Deportiva v{{ version }}</span>
-            <span class="app-status">{{ getOnlineStatus() }}</span>
+          <!-- Footer del menú -->
+          <div class="menu-footer">
+            <div class="footer-actions">
+              <ion-button fill="clear" size="small" (click)="abrirAyuda()">
+                <ion-icon name="help-circle"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" size="small" (click)="cerrarSesion()">
+                <ion-icon name="log-out"></ion-icon>
+              </ion-button>
+            </div>
+            <div class="app-info">
+              <span class="app-version">Gestión Deportiva v{{ version }}</span>
+              <span class="app-status-text">{{ getOnlineStatus() }}</span>
+            </div>
           </div>
+
         </div>
       </ion-content>
     </ion-menu>
 
-    <!-- Contenido principal -->
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
 </ion-app>

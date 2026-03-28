@@ -1,0 +1,93 @@
+<!-- src/app/pages/inventario/inventario.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Inventario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarDatos()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary">
+    <ion-searchbar 
+      placeholder="Buscar producto..." 
+      (ionInput)="onSearch($event)"
+      class="custom-search"
+    ></ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="filtro" (ionChange)="aplicarFiltros()" mode="md">
+      <ion-segment-button value="todos">
+        <ion-label>Todos ({{ productos.length }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="bajo_stock">
+        <ion-label>Bajo Stock ({{ productosBajoStock.length }})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-padding ion-text-center">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando inventario...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Alerta de bajo stock -->
+    <ion-card color="warning" *ngIf="productosBajoStock.length > 0 && filtro !== 'bajo_stock'">
+      <ion-card-content class="ion-flex ion-align-items-center">
+        <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+        <div class="ion-padding-start">
+          <h2 style="margin:0">Atención</h2>
+          <p style="margin:0">Hay {{ productosBajoStock.length }} productos con stock insuficiente.</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-list lines="full">
+      <ion-item *ngFor="let producto of productosFiltrados" class="product-item">
+        <ion-icon slot="start" name="cube-outline" color="medium"></ion-icon>
+        <ion-label>
+          <h2>{{ producto.nombre }}</h2>
+          <p>{{ producto.categoria || 'Sin categoría' }}</p>
+          <div class="stock-info">
+            <ion-progress-bar 
+              [value]="producto.stock / (producto.stockMinimo * 2)" 
+              [color]="getStockColor(producto)"
+            ></ion-progress-bar>
+            <div class="stock-details">
+              <span>Stock Actual: <strong>{{ producto.stock }}</strong></span>
+              <ion-note slot="end">Min: {{ producto.stockMinimo }}</ion-note>
+            </div>
+          </div>
+        </ion-label>
+        <ion-badge slot="end" [color]="getStockColor(producto)">
+          {{ producto.stock }}
+        </ion-badge>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="productosFiltrados.length === 0" class="ion-padding ion-text-center empty-state">
+      <ion-icon name="search-outline" size="large" color="medium"></ion-icon>
+      <h3>No se encontraron productos</h3>
+      <p>Intenta con otros términos o filtros.</p>
+    </div>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="registrarEntrada()" color="success">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

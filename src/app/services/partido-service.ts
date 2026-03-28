@@ -97,4 +97,8 @@ export class PartidoService {
   registrarPenales(partidoId: number, request: RegistrarPenalesRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${partidoId}/penales`, request);
   }
+
+  actualizarPartido(id: number, partido: PartidoDTO): Observable<PartidoDTO> {
+    return this.http.put<PartidoDTO>(`${this.apiUrl}/${id}`, partido);
+  }
 }

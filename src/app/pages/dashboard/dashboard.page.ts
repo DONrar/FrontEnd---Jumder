@@ -7,7 +7,7 @@ import {
   IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonList,
   IonItem, IonLabel, IonBadge, IonSegment, IonSegmentButton, IonGrid,
   IonRow, IonCol, IonRefresher, IonRefresherContent, IonSelect,
-  IonSelectOption, IonDatetime, IonModal, IonSkeletonText, IonToast
+  IonSelectOption, IonDatetime, IonModal, IonSkeletonText, IonToast, IonMenuButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -32,7 +32,7 @@ import { TorneoDTO } from '../../models/torneo.model';
     IonCardContent, IonList, IonItem, IonLabel, IonBadge, IonSegment,
     IonSegmentButton, IonGrid, IonRow, IonCol, IonRefresher,
     IonRefresherContent, IonSelect, IonSelectOption, IonDatetime,
-    IonModal, IonSkeletonText, IonToast
+    IonModal, IonSkeletonText, IonToast, IonMenuButton
   ]
 })
 export class DashboardPage implements OnInit {

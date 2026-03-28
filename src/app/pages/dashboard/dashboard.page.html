@@ -1,6 +1,9 @@
 <!-- src/app/pages/dashboard/dashboard.page.html -->
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar class="dashboard-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>
       <ion-icon name="stats-chart-outline"></ion-icon>
       Dashboard
@@ -15,7 +18,7 @@
     </ion-buttons>
   </ion-toolbar>
 
-  <ion-toolbar>
+  <ion-toolbar class="segment-toolbar">
     <ion-segment [(ngModel)]="segmentValue" (ionChange)="onSegmentChange($event)" mode="md">
       <ion-segment-button value="general">
         <ion-label>General</ion-label>
